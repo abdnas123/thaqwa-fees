@@ -1066,7 +1066,7 @@ body {
 // ═══════════════════════════════════════════════════════
 
 // IMPORTANT: Replace this URL with your deployed Google Apps Script URL
-const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbyu3gFBJ0oEpnZ4GbhbcRVs8UmnZzr_ZzDezIhR57NmixlyKjGp3TbjweDfaQW_-zBM/exec';
+const SCRIPT_URL = 'YOUR_GOOGLE_APPS_SCRIPT_URL_HERE';
 
 const DIVISIONS = [
   { group: 'Pre-Primary', items: ['UKG'] },
@@ -1175,10 +1175,13 @@ async function api(action, payload = {}) {
   if (isDemo()) return demoApi(action, payload);
   showLoading(true);
   try {
-    const resp = await fetch(SCRIPT_URL, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ action, payload }),
+    const params = new URLSearchParams({
+      action,
+      payload: JSON.stringify(payload)
+    });
+    const resp = await fetch(`${SCRIPT_URL}?${params.toString()}`, {
+      method: 'GET',
+      redirect: 'follow',
     });
     const data = await resp.json();
     return data;
