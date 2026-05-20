@@ -410,7 +410,7 @@ body{font-family:'DM Sans',sans-serif;background:var(--cream);color:var(--text);
 // ══════════════════════════════════════════════
 //  CONFIG
 // ══════════════════════════════════════════════
-const SCRIPT_URL = 'YOUR_GOOGLE_APPS_SCRIPT_URL_HERE';
+const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbyu3gFBJ0oEpnZ4GbhbcRVs8UmnZzr_ZzDezIhR57NmixlyKjGp3TbjweDfaQW_-zBM/exec';
 
 const DIVISIONS = [
   { group:'Pre-Primary', items:['UKG'] },
@@ -504,7 +504,7 @@ function saveDemoState() {
   localStorage.setItem('tm_receipt',  String(demoReceipt));
 }
 
-const isDemo = () => SCRIPT_URL === 'https://script.google.com/macros/s/AKfycbyu3gFBJ0oEpnZ4GbhbcRVs8UmnZzr_ZzDezIhR57NmixlyKjGp3TbjweDfaQW_-zBM/exec';
+const isDemo = () => SCRIPT_URL === 'YOUR_GOOGLE_APPS_SCRIPT_URL_HERE';
 
 // ══════════════════════════════════════════════
 //  API
