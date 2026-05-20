@@ -11,854 +11,209 @@
 <title>Thaqwa Madrasa — Fee Collection</title>
 <link href="https://fonts.googleapis.com/css2?family=Amiri:wght@400;700&family=DM+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 <style>
-/* ═══════════════════════════════════════════
-   ROOT & RESET
-═══════════════════════════════════════════ */
 :root {
-  --navy:       #1A3C5E;
-  --navy-mid:   #2E5F8A;
-  --navy-light: #3D7BB5;
-  --gold:       #C8961A;
-  --gold-light: #F0B429;
-  --gold-pale:  #FEF3DC;
-  --cream:      #F8F4EE;
-  --cream-dark: #EDE6D8;
-  --green:      #1A6B3C;
-  --green-light:#D4F5E2;
-  --red:        #B22222;
-  --red-light:  #FDECEA;
-  --text:       #1C2B3A;
-  --text-mid:   #3D5670;
-  --text-muted: #6B8BA4;
-  --border:     #C8D8E8;
-  --white:      #FFFFFF;
-  --shadow-sm:  0 2px 8px rgba(26,60,94,0.10);
-  --shadow-md:  0 4px 20px rgba(26,60,94,0.14);
-  --shadow-lg:  0 8px 40px rgba(26,60,94,0.20);
-  --radius:     14px;
-  --radius-sm:  10px;
-  --radius-xs:  7px;
+  --navy:#1A3C5E;--navy-mid:#2E5F8A;--navy-light:#3D7BB5;
+  --gold:#C8961A;--gold-light:#F0B429;--gold-pale:#FEF3DC;
+  --cream:#F8F4EE;--cream-dark:#EDE6D8;
+  --green:#1A6B3C;--green-light:#D4F5E2;
+  --red:#B22222;--red-light:#FDECEA;
+  --text:#1C2B3A;--text-mid:#3D5670;--text-muted:#6B8BA4;
+  --border:#C8D8E8;--white:#FFFFFF;
+  --shadow-sm:0 2px 8px rgba(26,60,94,0.10);
+  --radius:14px;--radius-sm:10px;--radius-xs:7px;
 }
-*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-html { height: 100%; }
-body {
-  font-family: 'DM Sans', sans-serif;
-  background: var(--cream);
-  color: var(--text);
-  height: 100%;
-  overflow-x: hidden;
-  -webkit-tap-highlight-color: transparent;
-  -webkit-font-smoothing: antialiased;
-}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+html{height:100%;}
+body{font-family:'DM Sans',sans-serif;background:var(--cream);color:var(--text);height:100%;overflow-x:hidden;-webkit-tap-highlight-color:transparent;-webkit-font-smoothing:antialiased;}
+.screen{display:none;min-height:100vh;flex-direction:column;animation:fadeIn 0.25s ease;}
+.screen.active{display:flex;}
+@keyframes fadeIn{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
 
-/* ═══════════════════════════════════════════
-   SCREENS
-═══════════════════════════════════════════ */
-.screen {
-  display: none;
-  min-height: 100vh;
-  flex-direction: column;
-  animation: fadeIn 0.25s ease;
-}
-.screen.active { display: flex; }
-@keyframes fadeIn { from { opacity:0; transform:translateY(8px); } to { opacity:1; transform:none; } }
+/* LOGIN */
+#loginScreen{background:linear-gradient(160deg,var(--navy) 0%,#0E2540 55%,#1A3C5E 100%);align-items:center;justify-content:center;padding:24px;position:relative;overflow:hidden;}
+#loginScreen::before{content:'';position:absolute;width:400px;height:400px;background:radial-gradient(circle,rgba(200,150,26,0.12) 0%,transparent 70%);top:-100px;right:-100px;border-radius:50%;}
+#loginScreen::after{content:'';position:absolute;width:300px;height:300px;background:radial-gradient(circle,rgba(61,123,181,0.15) 0%,transparent 70%);bottom:-80px;left:-80px;border-radius:50%;}
+.login-card{background:rgba(255,255,255,0.06);backdrop-filter:blur(20px);border:1px solid rgba(255,255,255,0.12);border-radius:24px;padding:36px 28px 32px;width:100%;max-width:380px;text-align:center;position:relative;z-index:1;}
+.login-emblem{width:72px;height:72px;background:linear-gradient(135deg,var(--gold) 0%,#E8A820 100%);border-radius:20px;display:flex;align-items:center;justify-content:center;font-size:32px;margin:0 auto 20px;box-shadow:0 8px 24px rgba(200,150,26,0.4);}
+.login-title{font-family:'Amiri',serif;font-size:1.5rem;font-weight:700;color:white;line-height:1.2;}
+.login-subtitle{font-size:0.78rem;color:rgba(255,255,255,0.55);margin-top:4px;letter-spacing:0.08em;text-transform:uppercase;}
+.login-divider{height:1px;background:rgba(255,255,255,0.12);margin:24px 0;}
+.pin-label{font-size:0.8rem;font-weight:600;color:rgba(255,255,255,0.6);text-transform:uppercase;letter-spacing:0.1em;margin-bottom:16px;}
+.pin-dots{display:flex;gap:12px;justify-content:center;margin-bottom:24px;}
+.pin-dot{width:18px;height:18px;border-radius:50%;border:2px solid rgba(255,255,255,0.3);background:transparent;transition:all 0.2s ease;}
+.pin-dot.filled{background:var(--gold-light);border-color:var(--gold-light);box-shadow:0 0 10px rgba(240,180,41,0.5);}
+.pin-keypad{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;}
+.pin-key{background:rgba(255,255,255,0.08);border:1px solid rgba(255,255,255,0.12);border-radius:14px;padding:16px;color:white;font-family:'DM Sans',sans-serif;font-size:1.2rem;font-weight:700;cursor:pointer;transition:all 0.15s ease;touch-action:manipulation;}
+.pin-key:active{background:rgba(255,255,255,0.2);transform:scale(0.94);}
+.pin-key.pin-clear{font-size:0.85rem;color:rgba(255,255,255,0.6);}
+.pin-key.pin-enter{background:linear-gradient(135deg,var(--gold) 0%,#E8A820 100%);border-color:transparent;color:var(--navy);font-size:0.85rem;box-shadow:0 4px 14px rgba(200,150,26,0.4);}
+.login-error{color:#FF8A80;font-size:0.82rem;font-weight:600;margin-top:12px;min-height:20px;text-align:center;}
+.login-attempt-info{color:rgba(255,255,255,0.4);font-size:0.72rem;margin-top:8px;}
 
-/* ═══════════════════════════════════════════
-   ── SCREEN 1: LOGIN ──
-═══════════════════════════════════════════ */
-#loginScreen {
-  background: linear-gradient(160deg, var(--navy) 0%, #0E2540 55%, #1A3C5E 100%);
-  align-items: center;
-  justify-content: center;
-  padding: 24px;
-  position: relative;
-  overflow: hidden;
-}
-#loginScreen::before {
-  content: '';
-  position: absolute;
-  width: 400px; height: 400px;
-  background: radial-gradient(circle, rgba(200,150,26,0.12) 0%, transparent 70%);
-  top: -100px; right: -100px;
-  border-radius: 50%;
-}
-#loginScreen::after {
-  content: '';
-  position: absolute;
-  width: 300px; height: 300px;
-  background: radial-gradient(circle, rgba(61,123,181,0.15) 0%, transparent 70%);
-  bottom: -80px; left: -80px;
-  border-radius: 50%;
-}
-.login-card {
-  background: rgba(255,255,255,0.06);
-  backdrop-filter: blur(20px);
-  border: 1px solid rgba(255,255,255,0.12);
-  border-radius: 24px;
-  padding: 36px 28px 32px;
-  width: 100%;
-  max-width: 380px;
-  text-align: center;
-  position: relative;
-  z-index: 1;
-}
-.login-emblem {
-  width: 72px; height: 72px;
-  background: linear-gradient(135deg, var(--gold) 0%, #E8A820 100%);
-  border-radius: 20px;
-  display: flex; align-items: center; justify-content: center;
-  font-size: 32px;
-  margin: 0 auto 20px;
-  box-shadow: 0 8px 24px rgba(200,150,26,0.4);
-}
-.login-title {
-  font-family: 'Amiri', serif;
-  font-size: 1.5rem;
-  font-weight: 700;
-  color: white;
-  line-height: 1.2;
-}
-.login-subtitle {
-  font-size: 0.78rem;
-  color: rgba(255,255,255,0.55);
-  margin-top: 4px;
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
-}
-.login-divider {
-  height: 1px;
-  background: rgba(255,255,255,0.12);
-  margin: 24px 0;
-}
-.pin-label {
-  font-size: 0.8rem;
-  font-weight: 600;
-  color: rgba(255,255,255,0.6);
-  text-transform: uppercase;
-  letter-spacing: 0.1em;
-  margin-bottom: 16px;
-}
-.pin-dots {
-  display: flex;
-  gap: 12px;
-  justify-content: center;
-  margin-bottom: 24px;
-}
-.pin-dot {
-  width: 18px; height: 18px;
-  border-radius: 50%;
-  border: 2px solid rgba(255,255,255,0.3);
-  background: transparent;
-  transition: all 0.2s ease;
-}
-.pin-dot.filled {
-  background: var(--gold-light);
-  border-color: var(--gold-light);
-  box-shadow: 0 0 10px rgba(240,180,41,0.5);
-}
-.pin-keypad {
-  display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: 10px;
-}
-.pin-key {
-  background: rgba(255,255,255,0.08);
-  border: 1px solid rgba(255,255,255,0.12);
-  border-radius: 14px;
-  padding: 16px;
-  color: white;
-  font-family: 'DM Sans', sans-serif;
-  font-size: 1.2rem;
-  font-weight: 700;
-  cursor: pointer;
-  transition: all 0.15s ease;
-  touch-action: manipulation;
-}
-.pin-key:active { background: rgba(255,255,255,0.2); transform: scale(0.94); }
-.pin-key.pin-clear { font-size: 0.85rem; color: rgba(255,255,255,0.6); }
-.pin-key.pin-enter {
-  background: linear-gradient(135deg, var(--gold) 0%, #E8A820 100%);
-  border-color: transparent;
-  color: var(--navy);
-  font-size: 0.85rem;
-  box-shadow: 0 4px 14px rgba(200,150,26,0.4);
-}
-.pin-key.pin-enter:active { transform: scale(0.94); }
-.login-error {
-  color: #FF8A80;
-  font-size: 0.82rem;
-  font-weight: 600;
-  margin-top: 12px;
-  min-height: 20px;
-  text-align: center;
-}
-.login-attempt-info {
-  color: rgba(255,255,255,0.4);
-  font-size: 0.72rem;
-  margin-top: 8px;
-}
+/* HEADER */
+.app-header{background:linear-gradient(90deg,var(--navy) 0%,var(--navy-mid) 100%);padding:14px 16px;display:flex;align-items:center;gap:12px;position:sticky;top:0;z-index:50;box-shadow:0 2px 12px rgba(26,60,94,0.25);}
+.header-back{width:36px;height:36px;background:rgba(255,255,255,0.12);border:none;border-radius:10px;color:white;font-size:1rem;cursor:pointer;display:flex;align-items:center;justify-content:center;flex-shrink:0;touch-action:manipulation;}
+.header-info{flex:1;min-width:0;}
+.header-title{font-size:0.95rem;font-weight:700;color:white;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.header-sub{font-size:0.7rem;color:rgba(255,255,255,0.6);margin-top:1px;}
+.header-user{background:rgba(255,255,255,0.1);border:1px solid rgba(255,255,255,0.2);border-radius:20px;padding:4px 10px 4px 7px;display:flex;align-items:center;gap:6px;flex-shrink:0;}
+.header-avatar{width:22px;height:22px;background:var(--gold);border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:0.65rem;font-weight:800;color:var(--navy);}
+.header-username{font-size:0.72rem;font-weight:700;color:white;max-width:80px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
 
-/* ═══════════════════════════════════════════
-   ── SHARED HEADER ──
-═══════════════════════════════════════════ */
-.app-header {
-  background: linear-gradient(90deg, var(--navy) 0%, var(--navy-mid) 100%);
-  padding: 14px 16px;
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  position: sticky;
-  top: 0;
-  z-index: 50;
-  box-shadow: 0 2px 12px rgba(26,60,94,0.25);
-}
-.header-back {
-  width: 36px; height: 36px;
-  background: rgba(255,255,255,0.12);
-  border: none;
-  border-radius: 10px;
-  color: white;
-  font-size: 1rem;
-  cursor: pointer;
-  display: flex; align-items: center; justify-content: center;
-  flex-shrink: 0;
-  touch-action: manipulation;
-}
-.header-info { flex: 1; min-width: 0; }
-.header-title {
-  font-size: 0.95rem;
-  font-weight: 700;
-  color: white;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-}
-.header-sub {
-  font-size: 0.7rem;
-  color: rgba(255,255,255,0.6);
-  margin-top: 1px;
-}
-.header-user {
-  background: rgba(255,255,255,0.1);
-  border: 1px solid rgba(255,255,255,0.2);
-  border-radius: 20px;
-  padding: 4px 10px 4px 7px;
-  display: flex;
-  align-items: center;
-  gap: 6px;
-  flex-shrink: 0;
-}
-.header-avatar {
-  width: 22px; height: 22px;
-  background: var(--gold);
-  border-radius: 50%;
-  display: flex; align-items: center; justify-content: center;
-  font-size: 0.65rem;
-  font-weight: 800;
-  color: var(--navy);
-}
-.header-username {
-  font-size: 0.72rem;
-  font-weight: 700;
-  color: white;
-  max-width: 80px;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-}
+/* HOME */
+.home-body{flex:1;padding:16px;overflow-y:auto;}
+.home-welcome{background:linear-gradient(135deg,var(--gold-pale) 0%,#FFF8EC 100%);border:1px solid #EDD99A;border-radius:var(--radius);padding:16px;margin-bottom:18px;display:flex;align-items:center;gap:12px;}
+.welcome-icon{font-size:1.8rem;}
+.welcome-text h3{font-size:0.95rem;font-weight:700;color:var(--navy);}
+.welcome-text p{font-size:0.78rem;color:var(--text-muted);margin-top:2px;}
+.section-label{font-size:0.72rem;font-weight:800;text-transform:uppercase;letter-spacing:0.1em;color:var(--text-muted);margin-bottom:10px;padding-left:2px;}
+.class-group{margin-bottom:20px;}
+.class-group-title{font-size:0.8rem;font-weight:700;color:var(--navy);margin-bottom:8px;display:flex;align-items:center;gap:7px;}
+.class-group-title::after{content:'';flex:1;height:1px;background:var(--border);}
+.division-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:9px;}
+.division-btn{background:white;border:1.5px solid var(--border);border-radius:var(--radius-sm);padding:14px 8px;display:flex;flex-direction:column;align-items:center;gap:4px;cursor:pointer;transition:all 0.15s ease;touch-action:manipulation;position:relative;overflow:hidden;}
+.division-btn::before{content:'';position:absolute;top:0;left:0;right:0;height:3px;background:linear-gradient(90deg,var(--navy),var(--navy-light));transform:scaleX(0);transition:transform 0.2s ease;}
+.division-btn:active{transform:scale(0.96);background:#EEF5FB;}
+.division-btn:active::before{transform:scaleX(1);}
+.div-name{font-size:1rem;font-weight:800;color:var(--navy);}
+.div-count{font-size:0.68rem;color:var(--text-muted);font-weight:600;}
 
-/* ═══════════════════════════════════════════
-   ── SCREEN 2: HOME (Division Select) ──
-═══════════════════════════════════════════ */
-.home-body { flex: 1; padding: 16px; overflow-y: auto; }
-.home-welcome {
-  background: linear-gradient(135deg, var(--gold-pale) 0%, #FFF8EC 100%);
-  border: 1px solid #EDD99A;
-  border-radius: var(--radius);
-  padding: 16px;
-  margin-bottom: 18px;
-  display: flex;
-  align-items: center;
-  gap: 12px;
-}
-.welcome-icon { font-size: 1.8rem; }
-.welcome-text h3 { font-size: 0.95rem; font-weight: 700; color: var(--navy); }
-.welcome-text p { font-size: 0.78rem; color: var(--text-muted); margin-top: 2px; }
+/* STUDENT SCREEN */
+.page-body{flex:1;overflow-y:auto;padding:14px;}
+.month-strip-wrap{background:white;border-radius:var(--radius);border:1px solid var(--border);padding:14px;margin-bottom:14px;box-shadow:var(--shadow-sm);}
+.month-strip-label{font-size:0.72rem;font-weight:700;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.08em;margin-bottom:10px;}
+.month-strip{display:flex;gap:6px;overflow-x:auto;padding-bottom:4px;scrollbar-width:none;}
+.month-strip::-webkit-scrollbar{display:none;}
+.month-chip{flex-shrink:0;padding:7px 14px;border-radius:20px;border:1.5px solid var(--border);background:var(--cream);font-size:0.78rem;font-weight:700;color:var(--text-mid);cursor:pointer;transition:all 0.15s;touch-action:manipulation;white-space:nowrap;}
+.month-chip.selected{background:var(--navy);border-color:var(--navy);color:white;box-shadow:0 3px 10px rgba(26,60,94,0.3);}
+.search-wrap{position:relative;margin-bottom:12px;}
+.search-wrap input{width:100%;padding:11px 14px 11px 40px;border-radius:var(--radius-sm);border:1.5px solid var(--border);font-family:'DM Sans',sans-serif;font-size:0.9rem;background:white;color:var(--text);outline:none;transition:border-color 0.15s;-webkit-appearance:none;}
+.search-wrap input:focus{border-color:var(--navy-light);}
+.search-icon{position:absolute;left:13px;top:50%;transform:translateY(-50%);color:var(--text-muted);font-size:0.95rem;pointer-events:none;}
+.student-actions{display:flex;gap:8px;margin-bottom:12px;}
+.btn-xs{padding:7px 14px;border-radius:8px;border:1.5px solid var(--border);background:white;font-family:'DM Sans',sans-serif;font-size:0.78rem;font-weight:700;color:var(--navy);cursor:pointer;touch-action:manipulation;transition:all 0.15s;}
+.btn-xs:active{background:var(--cream-dark);}
+.btn-xs.primary{background:var(--navy);border-color:var(--navy);color:white;}
+.student-cards{display:flex;flex-direction:column;gap:8px;}
+.student-card{background:white;border:1.5px solid var(--border);border-radius:var(--radius-sm);padding:13px 14px;display:flex;align-items:center;gap:12px;cursor:pointer;transition:all 0.15s;touch-action:manipulation;}
+.student-card:active{background:#EEF5FB;}
+.student-card.selected{border-color:var(--navy);background:linear-gradient(135deg,#EEF5FB 0%,#E0EDF8 100%);}
+.student-card.already-paid{border-color:#5CB87A;background:linear-gradient(135deg,#F0FBF4 0%,#E4F7EC 100%);cursor:default;}
+.s-checkbox{width:24px;height:24px;border-radius:7px;border:2px solid var(--border);display:flex;align-items:center;justify-content:center;flex-shrink:0;transition:all 0.15s;background:white;font-size:0.85rem;color:white;}
+.student-card.selected .s-checkbox{background:var(--navy);border-color:var(--navy);}
+.student-card.already-paid .s-checkbox{background:var(--green);border-color:var(--green);}
+.s-info{flex:1;min-width:0;}
+.s-name{font-size:0.9rem;font-weight:700;color:var(--text);}
+.s-id{font-size:0.68rem;color:var(--text-muted);font-weight:600;margin-top:1px;}
+.s-wa{font-size:0.68rem;color:var(--green);font-weight:600;margin-top:1px;}
+.paid-badge{font-size:0.65rem;font-weight:800;letter-spacing:0.06em;text-transform:uppercase;padding:3px 9px;border-radius:20px;background:var(--green);color:white;flex-shrink:0;}
+.empty-msg{text-align:center;padding:40px 20px;color:var(--text-muted);}
+.empty-msg .empty-icon{font-size:2.5rem;margin-bottom:10px;}
+.empty-msg p{font-size:0.88rem;}
 
-.section-label {
-  font-size: 0.72rem;
-  font-weight: 800;
-  text-transform: uppercase;
-  letter-spacing: 0.1em;
-  color: var(--text-muted);
-  margin-bottom: 10px;
-  padding-left: 2px;
-}
-.class-group { margin-bottom: 20px; }
-.class-group-title {
-  font-size: 0.8rem;
-  font-weight: 700;
-  color: var(--navy);
-  margin-bottom: 8px;
-  display: flex;
-  align-items: center;
-  gap: 7px;
-}
-.class-group-title::after {
-  content: '';
-  flex: 1;
-  height: 1px;
-  background: var(--border);
-}
-.division-grid {
-  display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: 9px;
-}
-.division-btn {
-  background: white;
-  border: 1.5px solid var(--border);
-  border-radius: var(--radius-sm);
-  padding: 14px 8px;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 4px;
-  cursor: pointer;
-  transition: all 0.15s ease;
-  touch-action: manipulation;
-  position: relative;
-  overflow: hidden;
-}
-.division-btn::before {
-  content: '';
-  position: absolute;
-  top: 0; left: 0; right: 0;
-  height: 3px;
-  background: linear-gradient(90deg, var(--navy), var(--navy-light));
-  transform: scaleX(0);
-  transition: transform 0.2s ease;
-}
-.division-btn:active { transform: scale(0.96); background: #EEF5FB; }
-.division-btn:active::before { transform: scaleX(1); }
-.div-name {
-  font-size: 1rem;
-  font-weight: 800;
-  color: var(--navy);
-}
-.div-count {
-  font-size: 0.68rem;
-  color: var(--text-muted);
-  font-weight: 600;
-}
-.div-collected {
-  font-size: 0.68rem;
-  font-weight: 700;
-  color: var(--green);
-  background: var(--green-light);
-  padding: 2px 7px;
-  border-radius: 20px;
-}
+/* STICKY BAR */
+.sticky-bar{position:sticky;bottom:0;background:white;border-top:1px solid var(--border);padding:12px 16px;display:flex;align-items:center;gap:12px;box-shadow:0 -4px 20px rgba(26,60,94,0.10);z-index:40;}
+.bar-info{flex:1;min-width:0;}
+.bar-count{font-size:0.82rem;font-weight:700;color:var(--text-mid);}
+.bar-amount{font-size:1.1rem;font-weight:800;color:var(--gold);}
+.btn-record{padding:13px 22px;background:linear-gradient(135deg,var(--navy) 0%,var(--navy-mid) 100%);color:white;border:none;border-radius:var(--radius-sm);font-family:'DM Sans',sans-serif;font-size:0.88rem;font-weight:800;cursor:pointer;touch-action:manipulation;transition:all 0.18s;box-shadow:0 4px 14px rgba(26,60,94,0.3);white-space:nowrap;}
+.btn-record:disabled{opacity:0.4;box-shadow:none;}
+.btn-record:not(:disabled):active{transform:scale(0.97);}
 
-/* ═══════════════════════════════════════════
-   ── SCREEN 3: STUDENT LIST ──
-═══════════════════════════════════════════ */
-.page-body { flex: 1; overflow-y: auto; padding: 14px; }
+/* MODALS */
+.modal-overlay{position:fixed;inset:0;background:rgba(14,37,64,0.65);z-index:100;display:none;align-items:flex-end;justify-content:center;padding:0;}
+.modal-overlay.open{display:flex;animation:overlayIn 0.2s ease;}
+@keyframes overlayIn{from{opacity:0}to{opacity:1}}
+.modal-sheet{background:white;border-radius:24px 24px 0 0;width:100%;max-width:480px;max-height:92vh;overflow-y:auto;animation:sheetUp 0.28s cubic-bezier(0.34,1.4,0.64,1);}
+@keyframes sheetUp{from{transform:translateY(100%)}to{transform:translateY(0)}}
+.modal-handle{width:40px;height:4px;background:var(--border);border-radius:2px;margin:12px auto 0;}
 
-/* Month strip */
-.month-strip-wrap {
-  background: white;
-  border-radius: var(--radius);
-  border: 1px solid var(--border);
-  padding: 14px;
-  margin-bottom: 14px;
-  box-shadow: var(--shadow-sm);
-}
-.month-strip-label { font-size: 0.72rem; font-weight: 700; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: 10px; }
-.month-strip {
-  display: flex;
-  gap: 6px;
-  overflow-x: auto;
-  padding-bottom: 4px;
-  scrollbar-width: none;
-}
-.month-strip::-webkit-scrollbar { display: none; }
-.month-chip {
-  flex-shrink: 0;
-  padding: 7px 14px;
-  border-radius: 20px;
-  border: 1.5px solid var(--border);
-  background: var(--cream);
-  font-size: 0.78rem;
-  font-weight: 700;
-  color: var(--text-mid);
-  cursor: pointer;
-  transition: all 0.15s;
-  touch-action: manipulation;
-  white-space: nowrap;
-}
-.month-chip.selected {
-  background: var(--navy);
-  border-color: var(--navy);
-  color: white;
-  box-shadow: 0 3px 10px rgba(26,60,94,0.3);
-}
-.month-chip.paid { border-color: var(--green); color: var(--green); background: var(--green-light); }
+/* RECEIPT */
+.receipt-wrap{padding:20px 24px 32px;}
+.receipt-header{text-align:center;margin-bottom:20px;}
+.receipt-logo{font-size:2rem;margin-bottom:4px;}
+.receipt-inst{font-family:'Amiri',serif;font-size:1.2rem;font-weight:700;color:var(--navy);line-height:1.2;}
+.receipt-loc{font-size:0.75rem;color:var(--text-muted);}
+.receipt-title{display:inline-block;margin-top:10px;background:var(--navy);color:white;padding:4px 18px;border-radius:20px;font-size:0.78rem;font-weight:800;letter-spacing:0.1em;text-transform:uppercase;}
+.receipt-divider{border:none;border-top:1.5px dashed var(--border);margin:16px 0;}
+.receipt-row{display:flex;justify-content:space-between;align-items:baseline;padding:5px 0;font-size:0.85rem;}
+.receipt-row .r-label{color:var(--text-muted);font-weight:500;}
+.receipt-row .r-value{font-weight:700;color:var(--text);text-align:right;max-width:60%;}
+.receipt-months{background:var(--cream);border-radius:var(--radius-sm);padding:12px 14px;margin:12px 0;}
+.receipt-months-title{font-size:0.72rem;font-weight:800;text-transform:uppercase;letter-spacing:0.08em;color:var(--text-muted);margin-bottom:8px;}
+.receipt-month-list{display:flex;flex-direction:column;gap:5px;}
+.receipt-month-item{display:flex;justify-content:space-between;font-size:0.85rem;}
+.receipt-month-item .m-name{color:var(--text-mid);font-weight:600;}
+.receipt-month-item .m-amt{font-weight:700;color:var(--green);}
+.receipt-total{background:var(--navy);border-radius:var(--radius-sm);padding:14px 16px;display:flex;justify-content:space-between;align-items:center;margin-top:4px;}
+.receipt-total .t-label{color:rgba(255,255,255,0.8);font-weight:700;font-size:0.9rem;}
+.receipt-total .t-amount{color:var(--gold-light);font-weight:800;font-size:1.2rem;}
+.receipt-actions{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:20px;}
+.btn-receipt{padding:13px;border-radius:var(--radius-sm);border:none;font-family:'DM Sans',sans-serif;font-size:0.85rem;font-weight:700;cursor:pointer;touch-action:manipulation;transition:all 0.15s;display:flex;align-items:center;justify-content:center;gap:7px;}
+.btn-receipt.whatsapp{background:#25D366;color:white;}
+.btn-receipt.done{background:var(--navy);color:white;}
 
-/* Student search */
-.search-wrap {
-  position: relative;
-  margin-bottom: 12px;
-}
-.search-wrap input {
-  width: 100%;
-  padding: 11px 14px 11px 40px;
-  border-radius: var(--radius-sm);
-  border: 1.5px solid var(--border);
-  font-family: 'DM Sans', sans-serif;
-  font-size: 0.9rem;
-  background: white;
-  color: var(--text);
-  outline: none;
-  transition: border-color 0.15s;
-  -webkit-appearance: none;
-}
-.search-wrap input:focus { border-color: var(--navy-light); }
-.search-icon {
-  position: absolute;
-  left: 13px; top: 50%;
-  transform: translateY(-50%);
-  color: var(--text-muted);
-  font-size: 0.95rem;
-  pointer-events: none;
-}
+/* FORMS */
+.modal-form{padding:20px 24px 32px;}
+.modal-form h2{font-size:1.05rem;font-weight:800;color:var(--navy);margin-bottom:18px;}
+.form-group{margin-bottom:14px;}
+.form-group label{display:block;font-size:0.75rem;font-weight:700;text-transform:uppercase;letter-spacing:0.07em;color:var(--text-muted);margin-bottom:5px;}
+.form-group input{width:100%;padding:11px 14px;border-radius:var(--radius-xs);border:1.5px solid var(--border);font-family:'DM Sans',sans-serif;font-size:0.9rem;color:var(--text);background:white;outline:none;-webkit-appearance:none;}
+.form-group input:focus{border-color:var(--navy-light);}
+.form-group .field-hint{font-size:0.7rem;color:var(--text-muted);margin-top:3px;}
+.btn-full{width:100%;padding:13px;border-radius:var(--radius-sm);border:none;font-family:'DM Sans',sans-serif;font-size:0.9rem;font-weight:800;cursor:pointer;touch-action:manipulation;transition:all 0.15s;background:var(--navy);color:white;margin-top:4px;}
+.btn-full:active{background:var(--navy-mid);}
+.btn-full.secondary{background:white;color:var(--text-mid);border:1.5px solid var(--border);margin-top:10px;}
 
-/* Action row */
-.student-actions {
-  display: flex;
-  gap: 8px;
-  margin-bottom: 12px;
-}
-.btn-xs {
-  padding: 7px 14px;
-  border-radius: 8px;
-  border: 1.5px solid var(--border);
-  background: white;
-  font-family: 'DM Sans', sans-serif;
-  font-size: 0.78rem;
-  font-weight: 700;
-  color: var(--navy);
-  cursor: pointer;
-  touch-action: manipulation;
-  transition: all 0.15s;
-}
-.btn-xs:active { background: var(--cream-dark); }
-.btn-xs.primary { background: var(--navy); border-color: var(--navy); color: white; }
-.btn-xs.danger { border-color: var(--red); color: var(--red); }
+/* MANAGE LIST */
+.manage-row{display:flex;align-items:center;padding:10px 0;border-bottom:1px solid var(--border);gap:8px;}
+.manage-row-info{flex:1;min-width:0;}
+.manage-row-name{font-weight:700;font-size:0.88rem;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.manage-row-sub{font-size:0.7rem;color:var(--text-muted);margin-top:2px;}
+.manage-row-wa{font-size:0.7rem;color:var(--green);margin-top:1px;}
+.btn-manage{padding:5px 10px;border-radius:6px;font-size:0.75rem;font-weight:700;cursor:pointer;border:1px solid;touch-action:manipulation;}
+.btn-edit{background:#EEF5FB;border-color:var(--navy-light);color:var(--navy);}
+.btn-remove{background:var(--red-light);border-color:var(--red);color:var(--red);}
 
-/* Student cards */
-.student-cards { display: flex; flex-direction: column; gap: 8px; }
-.student-card {
-  background: white;
-  border: 1.5px solid var(--border);
-  border-radius: var(--radius-sm);
-  padding: 13px 14px;
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  cursor: pointer;
-  transition: all 0.15s;
-  touch-action: manipulation;
-  position: relative;
-}
-.student-card:active { background: #EEF5FB; }
-.student-card.selected {
-  border-color: var(--navy);
-  background: linear-gradient(135deg, #EEF5FB 0%, #E0EDF8 100%);
-}
-.student-card.already-paid {
-  border-color: #5CB87A;
-  background: linear-gradient(135deg, #F0FBF4 0%, #E4F7EC 100%);
-  cursor: default;
-}
-.s-checkbox {
-  width: 24px; height: 24px;
-  border-radius: 7px;
-  border: 2px solid var(--border);
-  display: flex; align-items: center; justify-content: center;
-  flex-shrink: 0;
-  transition: all 0.15s;
-  background: white;
-  font-size: 0.85rem;
-  color: white;
-}
-.student-card.selected .s-checkbox { background: var(--navy); border-color: var(--navy); }
-.student-card.already-paid .s-checkbox { background: var(--green); border-color: var(--green); }
-.s-info { flex: 1; min-width: 0; }
-.s-name { font-size: 0.9rem; font-weight: 700; color: var(--text); }
-.s-id { font-size: 0.68rem; color: var(--text-muted); font-weight: 600; margin-top: 1px; }
-.paid-badge {
-  font-size: 0.65rem;
-  font-weight: 800;
-  letter-spacing: 0.06em;
-  text-transform: uppercase;
-  padding: 3px 9px;
-  border-radius: 20px;
-  background: var(--green);
-  color: white;
-  flex-shrink: 0;
-}
+/* EDIT MODAL */
+.edit-student-info{background:var(--cream);border-radius:8px;padding:10px 14px;margin-bottom:16px;font-size:0.85rem;}
+.edit-student-info strong{color:var(--navy);}
 
-.empty-msg {
-  text-align: center;
-  padding: 40px 20px;
-  color: var(--text-muted);
-}
-.empty-msg .empty-icon { font-size: 2.5rem; margin-bottom: 10px; }
-.empty-msg p { font-size: 0.88rem; }
+/* TOAST */
+.toast{position:fixed;top:70px;left:50%;transform:translateX(-50%) translateY(-10px);background:var(--navy);color:white;padding:11px 20px;border-radius:20px;font-size:0.83rem;font-weight:700;z-index:999;opacity:0;pointer-events:none;transition:all 0.3s cubic-bezier(0.34,1.4,0.64,1);white-space:nowrap;max-width:90vw;text-align:center;border-left:3px solid var(--gold-light);}
+.toast.show{opacity:1;transform:translateX(-50%) translateY(0);}
+.toast.success{border-left-color:#5CB87A;}
+.toast.error{border-left-color:#FF6B6B;}
 
-/* ═══════════════════════════════════════════
-   ── STICKY FOOTER BAR ──
-═══════════════════════════════════════════ */
-.sticky-bar {
-  position: sticky;
-  bottom: 0;
-  background: white;
-  border-top: 1px solid var(--border);
-  padding: 12px 16px;
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  box-shadow: 0 -4px 20px rgba(26,60,94,0.10);
-  z-index: 40;
-}
-.bar-info { flex: 1; min-width: 0; }
-.bar-count { font-size: 0.82rem; font-weight: 700; color: var(--text-mid); }
-.bar-amount { font-size: 1.1rem; font-weight: 800; color: var(--gold); }
-.btn-record {
-  padding: 13px 22px;
-  background: linear-gradient(135deg, var(--navy) 0%, var(--navy-mid) 100%);
-  color: white;
-  border: none;
-  border-radius: var(--radius-sm);
-  font-family: 'DM Sans', sans-serif;
-  font-size: 0.88rem;
-  font-weight: 800;
-  cursor: pointer;
-  touch-action: manipulation;
-  transition: all 0.18s;
-  box-shadow: 0 4px 14px rgba(26,60,94,0.3);
-  white-space: nowrap;
-}
-.btn-record:disabled { opacity: 0.4; box-shadow: none; }
-.btn-record:not(:disabled):active { transform: scale(0.97); }
+/* LOADING */
+.loading-overlay{position:fixed;inset:0;background:rgba(26,60,94,0.5);z-index:200;display:none;align-items:center;justify-content:center;}
+.loading-overlay.show{display:flex;}
+.loading-spinner{width:48px;height:48px;border:4px solid rgba(255,255,255,0.2);border-top-color:var(--gold-light);border-radius:50%;animation:spin 0.8s linear infinite;}
+@keyframes spin{to{transform:rotate(360deg)}}
 
-/* ═══════════════════════════════════════════
-   ── RECEIPT MODAL ──
-═══════════════════════════════════════════ */
-.modal-overlay {
-  position: fixed; inset: 0;
-  background: rgba(14,37,64,0.65);
-  z-index: 100;
-  display: none;
-  align-items: flex-end;
-  justify-content: center;
-  padding: 0;
-}
-.modal-overlay.open { display: flex; animation: overlayIn 0.2s ease; }
-@keyframes overlayIn { from { opacity:0; } to { opacity:1; } }
-.modal-sheet {
-  background: white;
-  border-radius: 24px 24px 0 0;
-  width: 100%;
-  max-width: 480px;
-  max-height: 92vh;
-  overflow-y: auto;
-  animation: sheetUp 0.28s cubic-bezier(0.34, 1.4, 0.64, 1);
-}
-@keyframes sheetUp { from { transform: translateY(100%); } to { transform: translateY(0); } }
-.modal-handle {
-  width: 40px; height: 4px;
-  background: var(--border);
-  border-radius: 2px;
-  margin: 12px auto 0;
-}
-
-/* Receipt */
-.receipt-wrap { padding: 20px 24px 32px; }
-.receipt-header { text-align: center; margin-bottom: 20px; }
-.receipt-logo { font-size: 2rem; margin-bottom: 4px; }
-.receipt-inst {
-  font-family: 'Amiri', serif;
-  font-size: 1.2rem;
-  font-weight: 700;
-  color: var(--navy);
-  line-height: 1.2;
-}
-.receipt-loc { font-size: 0.75rem; color: var(--text-muted); }
-.receipt-title {
-  display: inline-block;
-  margin-top: 10px;
-  background: var(--navy);
-  color: white;
-  padding: 4px 18px;
-  border-radius: 20px;
-  font-size: 0.78rem;
-  font-weight: 800;
-  letter-spacing: 0.1em;
-  text-transform: uppercase;
-}
-.receipt-divider {
-  border: none;
-  border-top: 1.5px dashed var(--border);
-  margin: 16px 0;
-}
-.receipt-row {
-  display: flex;
-  justify-content: space-between;
-  align-items: baseline;
-  padding: 5px 0;
-  font-size: 0.85rem;
-}
-.receipt-row .r-label { color: var(--text-muted); font-weight: 500; }
-.receipt-row .r-value { font-weight: 700; color: var(--text); text-align: right; max-width: 60%; }
-.receipt-months {
-  background: var(--cream);
-  border-radius: var(--radius-sm);
-  padding: 12px 14px;
-  margin: 12px 0;
-}
-.receipt-months-title { font-size: 0.72rem; font-weight: 800; text-transform: uppercase; letter-spacing: 0.08em; color: var(--text-muted); margin-bottom: 8px; }
-.receipt-month-list { display: flex; flex-direction: column; gap: 5px; }
-.receipt-month-item {
-  display: flex;
-  justify-content: space-between;
-  font-size: 0.85rem;
-}
-.receipt-month-item .m-name { color: var(--text-mid); font-weight: 600; }
-.receipt-month-item .m-amt { font-weight: 700; color: var(--green); }
-.receipt-total {
-  background: var(--navy);
-  border-radius: var(--radius-sm);
-  padding: 14px 16px;
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-top: 4px;
-}
-.receipt-total .t-label { color: rgba(255,255,255,0.8); font-weight: 700; font-size: 0.9rem; }
-.receipt-total .t-amount { color: var(--gold-light); font-weight: 800; font-size: 1.2rem; }
-.receipt-footer {
-  text-align: center;
-  margin-top: 14px;
-  font-size: 0.78rem;
-  color: var(--text-muted);
-}
-.receipt-no { font-weight: 800; color: var(--navy); font-size: 0.8rem; }
-.receipt-actions {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 10px;
-  margin-top: 20px;
-}
-.btn-receipt {
-  padding: 13px;
-  border-radius: var(--radius-sm);
-  border: none;
-  font-family: 'DM Sans', sans-serif;
-  font-size: 0.85rem;
-  font-weight: 700;
-  cursor: pointer;
-  touch-action: manipulation;
-  transition: all 0.15s;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 7px;
-}
-.btn-receipt.whatsapp { background: #25D366; color: white; }
-.btn-receipt.whatsapp:active { background: #1DA851; }
-.btn-receipt.done { background: var(--navy); color: white; }
-.btn-receipt.done:active { background: var(--navy-mid); }
-
-/* ═══════════════════════════════════════════
-   ── ADD STUDENT MODAL ──
-═══════════════════════════════════════════ */
-.modal-form { padding: 20px 24px 32px; }
-.modal-form h2 { font-size: 1.05rem; font-weight: 800; color: var(--navy); margin-bottom: 18px; }
-.form-group { margin-bottom: 14px; }
-.form-group label {
-  display: block;
-  font-size: 0.75rem;
-  font-weight: 700;
-  text-transform: uppercase;
-  letter-spacing: 0.07em;
-  color: var(--text-muted);
-  margin-bottom: 5px;
-}
-.form-group input {
-  width: 100%;
-  padding: 11px 14px;
-  border-radius: var(--radius-xs);
-  border: 1.5px solid var(--border);
-  font-family: 'DM Sans', sans-serif;
-  font-size: 0.9rem;
-  color: var(--text);
-  background: white;
-  outline: none;
-  -webkit-appearance: none;
-}
-.form-group input:focus { border-color: var(--navy-light); }
-.btn-full {
-  width: 100%;
-  padding: 13px;
-  border-radius: var(--radius-sm);
-  border: none;
-  font-family: 'DM Sans', sans-serif;
-  font-size: 0.9rem;
-  font-weight: 800;
-  cursor: pointer;
-  touch-action: manipulation;
-  transition: all 0.15s;
-  background: var(--navy);
-  color: white;
-  margin-top: 4px;
-}
-.btn-full:active { background: var(--navy-mid); }
-.btn-full.secondary { background: white; color: var(--text-mid); border: 1.5px solid var(--border); margin-top: 10px; }
-
-/* ═══════════════════════════════════════════
-   ── TOAST ──
-═══════════════════════════════════════════ */
-.toast {
-  position: fixed;
-  top: 70px;
-  left: 50%;
-  transform: translateX(-50%) translateY(-10px);
-  background: var(--navy);
-  color: white;
-  padding: 11px 20px;
-  border-radius: 20px;
-  font-size: 0.83rem;
-  font-weight: 700;
-  z-index: 999;
-  opacity: 0;
-  pointer-events: none;
-  transition: all 0.3s cubic-bezier(0.34, 1.4, 0.64, 1);
-  white-space: nowrap;
-  max-width: 90vw;
-  text-align: center;
-  border-left: 3px solid var(--gold-light);
-}
-.toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
-.toast.success { border-left-color: #5CB87A; }
-.toast.error { border-left-color: #FF6B6B; }
-
-/* ═══════════════════════════════════════════
-   ── LOADING ──
-═══════════════════════════════════════════ */
-.loading-overlay {
-  position: fixed; inset: 0;
-  background: rgba(26,60,94,0.5);
-  z-index: 200;
-  display: none;
-  align-items: center;
-  justify-content: center;
-}
-.loading-overlay.show { display: flex; }
-.loading-spinner {
-  width: 48px; height: 48px;
-  border: 4px solid rgba(255,255,255,0.2);
-  border-top-color: var(--gold-light);
-  border-radius: 50%;
-  animation: spin 0.8s linear infinite;
-}
-@keyframes spin { to { transform: rotate(360deg); } }
-
-/* ═══════════════════════════════════════════
-   ── MENU / NAV ──
-═══════════════════════════════════════════ */
-.nav-menu {
-  position: fixed;
-  top: 0; right: 0;
-  width: 80vw;
-  max-width: 300px;
-  height: 100vh;
-  background: var(--navy);
-  z-index: 150;
-  transform: translateX(100%);
-  transition: transform 0.28s cubic-bezier(0.4, 0, 0.2, 1);
-  display: flex;
-  flex-direction: column;
-  padding: 0 0 24px;
-  box-shadow: -8px 0 30px rgba(0,0,0,0.3);
-}
-.nav-menu.open { transform: translateX(0); }
-.nav-overlay {
-  position: fixed; inset: 0;
-  background: rgba(0,0,0,0.4);
-  z-index: 149;
-  display: none;
-}
-.nav-overlay.open { display: block; }
-.nav-header {
-  background: rgba(0,0,0,0.2);
-  padding: 50px 20px 20px;
-}
-.nav-user-name { font-family: 'Amiri', serif; font-size: 1.1rem; color: white; font-weight: 700; }
-.nav-user-role { font-size: 0.72rem; color: rgba(255,255,255,0.5); text-transform: uppercase; letter-spacing: 0.08em; }
-.nav-items { padding: 16px; flex: 1; }
-.nav-item {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  padding: 13px 14px;
-  border-radius: var(--radius-xs);
-  color: rgba(255,255,255,0.7);
-  font-size: 0.9rem;
-  font-weight: 600;
-  cursor: pointer;
-  transition: all 0.15s;
-  margin-bottom: 4px;
-}
-.nav-item:hover, .nav-item:active { background: rgba(255,255,255,0.1); color: white; }
-.nav-item .ni-icon { font-size: 1.1rem; width: 24px; text-align: center; }
-.nav-logout {
-  margin: 0 16px;
-  padding: 12px;
-  border-radius: var(--radius-xs);
-  background: rgba(178,34,34,0.25);
-  border: 1px solid rgba(178,34,34,0.4);
-  color: #FF8A80;
-  font-family: 'DM Sans', sans-serif;
-  font-size: 0.88rem;
-  font-weight: 700;
-  cursor: pointer;
-  text-align: center;
-  touch-action: manipulation;
-}
-
-/* ═══════════════════════════════════════════
-   SCROLLBAR
-═══════════════════════════════════════════ */
-::-webkit-scrollbar { width: 5px; }
-::-webkit-scrollbar-track { background: transparent; }
-::-webkit-scrollbar-thumb { background: var(--border); border-radius: 10px; }
+/* NAV */
+.nav-menu{position:fixed;top:0;right:0;width:80vw;max-width:300px;height:100vh;background:var(--navy);z-index:150;transform:translateX(100%);transition:transform 0.28s cubic-bezier(0.4,0,0.2,1);display:flex;flex-direction:column;padding:0 0 24px;box-shadow:-8px 0 30px rgba(0,0,0,0.3);}
+.nav-menu.open{transform:translateX(0);}
+.nav-overlay{position:fixed;inset:0;background:rgba(0,0,0,0.4);z-index:149;display:none;}
+.nav-overlay.open{display:block;}
+.nav-header{background:rgba(0,0,0,0.2);padding:50px 20px 20px;}
+.nav-user-name{font-family:'Amiri',serif;font-size:1.1rem;color:white;font-weight:700;}
+.nav-user-role{font-size:0.72rem;color:rgba(255,255,255,0.5);text-transform:uppercase;letter-spacing:0.08em;}
+.nav-items{padding:16px;flex:1;}
+.nav-item{display:flex;align-items:center;gap:12px;padding:13px 14px;border-radius:var(--radius-xs);color:rgba(255,255,255,0.7);font-size:0.9rem;font-weight:600;cursor:pointer;transition:all 0.15s;margin-bottom:4px;}
+.nav-item:hover,.nav-item:active{background:rgba(255,255,255,0.1);color:white;}
+.nav-item .ni-icon{font-size:1.1rem;width:24px;text-align:center;}
+.nav-logout{margin:0 16px;padding:12px;border-radius:var(--radius-xs);background:rgba(178,34,34,0.25);border:1px solid rgba(178,34,34,0.4);color:#FF8A80;font-family:'DM Sans',sans-serif;font-size:0.88rem;font-weight:700;cursor:pointer;text-align:center;}
+::-webkit-scrollbar{width:5px;}::-webkit-scrollbar-track{background:transparent;}::-webkit-scrollbar-thumb{background:var(--border);border-radius:10px;}
+@keyframes shake{0%,100%{transform:translateX(0)}20%{transform:translateX(-8px)}40%{transform:translateX(8px)}60%{transform:translateX(-6px)}80%{transform:translateX(6px)}}
 </style>
 </head>
 <body>
 
-<!-- ── LOADING ─────────────────────────────── -->
-<div class="loading-overlay" id="loadingOverlay">
-  <div class="loading-spinner"></div>
-</div>
-
-<!-- ── TOAST ──────────────────────────────── -->
+<div class="loading-overlay" id="loadingOverlay"><div class="loading-spinner"></div></div>
 <div class="toast" id="toast"></div>
 
-<!-- ══════════════════════════════════════════
-  SCREEN 1: LOGIN
-══════════════════════════════════════════ -->
+<!-- LOGIN -->
 <div class="screen active" id="loginScreen">
   <div class="login-card">
     <div class="login-emblem">🕌</div>
@@ -867,10 +222,8 @@ body {
     <div class="login-divider"></div>
     <div class="pin-label">Enter Your PIN</div>
     <div class="pin-dots" id="pinDots">
-      <div class="pin-dot" id="dot0"></div>
-      <div class="pin-dot" id="dot1"></div>
-      <div class="pin-dot" id="dot2"></div>
-      <div class="pin-dot" id="dot3"></div>
+      <div class="pin-dot" id="dot0"></div><div class="pin-dot" id="dot1"></div>
+      <div class="pin-dot" id="dot2"></div><div class="pin-dot" id="dot3"></div>
     </div>
     <div class="pin-keypad">
       <button class="pin-key" onclick="pinPress('1')">1</button>
@@ -891,22 +244,19 @@ body {
   </div>
 </div>
 
-<!-- ══════════════════════════════════════════
-  SCREEN 2: HOME — Division Select
-══════════════════════════════════════════ -->
+<!-- HOME -->
 <div class="screen" id="homeScreen">
   <div class="app-header">
     <div class="header-info">
       <div class="header-title">🕌 Thaqwa Madrasa</div>
       <div class="header-sub">Fort Kochi · Fee Collection</div>
     </div>
-    <div class="header-user" id="headerUser">
+    <div class="header-user">
       <div class="header-avatar" id="headerAvatar">?</div>
       <div class="header-username" id="headerUsername">—</div>
     </div>
     <button class="header-back" style="margin-left:8px" onclick="openNav()">☰</button>
   </div>
-
   <div class="home-body">
     <div class="home-welcome">
       <div class="welcome-icon">👋</div>
@@ -915,15 +265,12 @@ body {
         <p>Select a division to record fee payments</p>
       </div>
     </div>
-
     <div class="section-label">All Divisions</div>
     <div id="divisionList"></div>
   </div>
 </div>
 
-<!-- ══════════════════════════════════════════
-  SCREEN 3: STUDENTS
-══════════════════════════════════════════ -->
+<!-- STUDENT SCREEN -->
 <div class="screen" id="studentScreen">
   <div class="app-header">
     <button class="header-back" onclick="goHome()">←</button>
@@ -933,15 +280,11 @@ body {
     </div>
     <button class="btn-xs" style="font-size:0.75rem" onclick="openAddStudent()">+ Add</button>
   </div>
-
   <div class="page-body">
-    <!-- Month selector -->
     <div class="month-strip-wrap">
       <div class="month-strip-label">Select Month(s) — tap to toggle</div>
       <div class="month-strip" id="monthStrip"></div>
     </div>
-
-    <!-- Search & Actions -->
     <div class="search-wrap">
       <span class="search-icon">🔍</span>
       <input type="text" id="searchInput" placeholder="Search student name…" oninput="filterStudents()" autocomplete="off">
@@ -951,32 +294,24 @@ body {
       <button class="btn-xs" onclick="clearAll()">Clear</button>
       <button class="btn-xs" style="margin-left:auto" onclick="openManageStudents()">⚙ Manage</button>
     </div>
-
-    <!-- Student list -->
     <div class="student-cards" id="studentCards"></div>
   </div>
-
-  <!-- Sticky bar -->
   <div class="sticky-bar">
     <div class="bar-info">
       <div class="bar-count" id="barCount">No students selected</div>
       <div class="bar-amount" id="barAmount"></div>
     </div>
-    <button class="btn-record" id="recordBtn" disabled onclick="openStudentSelect()">Record Payment</button>
+    <button class="btn-record" id="recordBtn" disabled onclick="openConfirm()">Record Payment</button>
   </div>
 </div>
 
-<!-- ══════════════════════════════════════════
-  STUDENT SELECT MODAL (which student to pay)
-══════════════════════════════════════════ -->
+<!-- CONFIRM MODAL -->
 <div class="modal-overlay" id="studentSelectModal">
   <div class="modal-sheet">
     <div class="modal-handle"></div>
     <div class="modal-form">
       <h2>Confirm Payment</h2>
-      <p style="font-size:0.82rem;color:var(--text-muted);margin-bottom:16px">
-        Recording <strong id="confirmMonths">—</strong> for selected students
-      </p>
+      <p style="font-size:0.82rem;color:var(--text-muted);margin-bottom:16px">Recording <strong id="confirmMonths">—</strong> for:</p>
       <div id="confirmStudentList" style="margin-bottom:16px"></div>
       <button class="btn-full" onclick="processNextStudent()">✅ Record & Generate Receipts</button>
       <button class="btn-full secondary" onclick="closeModal('studentSelectModal')">Cancel</button>
@@ -984,9 +319,7 @@ body {
   </div>
 </div>
 
-<!-- ══════════════════════════════════════════
-  RECEIPT MODAL
-══════════════════════════════════════════ -->
+<!-- RECEIPT MODAL -->
 <div class="modal-overlay" id="receiptModal">
   <div class="modal-sheet">
     <div class="modal-handle"></div>
@@ -994,9 +327,7 @@ body {
   </div>
 </div>
 
-<!-- ══════════════════════════════════════════
-  ADD STUDENT MODAL
-══════════════════════════════════════════ -->
+<!-- ADD STUDENT MODAL -->
 <div class="modal-overlay" id="addStudentModal">
   <div class="modal-sheet">
     <div class="modal-handle"></div>
@@ -1011,8 +342,9 @@ body {
         <input type="text" id="newGuardian" placeholder="Parent / Guardian name" autocomplete="off">
       </div>
       <div class="form-group">
-        <label>Contact Number</label>
-        <input type="tel" id="newContact" placeholder="Mobile number" autocomplete="off">
+        <label>WhatsApp Number *</label>
+        <input type="tel" id="newWhatsapp" placeholder="10-digit mobile number" maxlength="10" autocomplete="off">
+        <div class="field-hint">Must be exactly 10 digits — used to send receipts directly</div>
       </div>
       <button class="btn-full" onclick="addStudent()">➕ Add Student</button>
       <button class="btn-full secondary" onclick="closeModal('addStudentModal')">Cancel</button>
@@ -1020,23 +352,45 @@ body {
   </div>
 </div>
 
-<!-- ══════════════════════════════════════════
-  MANAGE STUDENTS MODAL
-══════════════════════════════════════════ -->
+<!-- EDIT STUDENT MODAL -->
+<div class="modal-overlay" id="editStudentModal">
+  <div class="modal-sheet">
+    <div class="modal-handle"></div>
+    <div class="modal-form">
+      <h2>Edit Student</h2>
+      <div class="edit-student-info" id="editStudentInfo"></div>
+      <div class="form-group">
+        <label>Student Name *</label>
+        <input type="text" id="editName" placeholder="Full name" autocomplete="off">
+      </div>
+      <div class="form-group">
+        <label>Guardian Name</label>
+        <input type="text" id="editGuardian" placeholder="Parent / Guardian name" autocomplete="off">
+      </div>
+      <div class="form-group">
+        <label>WhatsApp Number *</label>
+        <input type="tel" id="editWhatsapp" placeholder="10-digit mobile number" maxlength="10" autocomplete="off">
+        <div class="field-hint">Must be exactly 10 digits</div>
+      </div>
+      <button class="btn-full" onclick="saveEditStudent()">💾 Save Changes</button>
+      <button class="btn-full secondary" onclick="closeModal('editStudentModal')">Cancel</button>
+    </div>
+  </div>
+</div>
+
+<!-- MANAGE STUDENTS MODAL -->
 <div class="modal-overlay" id="manageModal">
   <div class="modal-sheet">
     <div class="modal-handle"></div>
     <div class="modal-form">
       <h2 id="manageTitle">Manage Students</h2>
-      <div id="manageList" style="max-height:60vh;overflow-y:auto"></div>
+      <div id="manageList" style="max-height:65vh;overflow-y:auto"></div>
       <button class="btn-full secondary" onclick="closeModal('manageModal')" style="margin-top:16px">Close</button>
     </div>
   </div>
 </div>
 
-<!-- ══════════════════════════════════════════
-  NAV MENU
-══════════════════════════════════════════ -->
+<!-- NAV -->
 <div class="nav-overlay" id="navOverlay" onclick="closeNav()"></div>
 <div class="nav-menu" id="navMenu">
   <div class="nav-header">
@@ -1044,42 +398,35 @@ body {
     <div class="nav-user-role" id="navUserRole">—</div>
   </div>
   <div class="nav-items">
-    <div class="nav-item" onclick="closeNav(); goHome()">
-      <span class="ni-icon">🏠</span> Home
-    </div>
-    <div class="nav-item" id="navAuditItem" onclick="closeNav(); showToast('Audit log coming soon','')">
-      <span class="ni-icon">📋</span> Audit Log
-    </div>
-    <div class="nav-item" id="navSummaryItem" onclick="closeNav(); showToast('Summary report coming soon','')">
-      <span class="ni-icon">📊</span> Summary Report
-    </div>
-    <div class="nav-item" id="navUsersItem" style="display:none" onclick="closeNav(); showToast('User management coming soon','')">
-      <span class="ni-icon">👥</span> Manage Users
-    </div>
+    <div class="nav-item" onclick="closeNav();goHome()"><span class="ni-icon">🏠</span> Home</div>
+    <div class="nav-item" onclick="closeNav();showToast('Audit log — coming soon','')"><span class="ni-icon">📋</span> Audit Log</div>
+    <div class="nav-item" onclick="closeNav();showToast('Summary report — coming soon','')"><span class="ni-icon">📊</span> Summary Report</div>
+    <div class="nav-item" id="navUsersItem" style="display:none" onclick="closeNav();showToast('User management — coming soon','')"><span class="ni-icon">👥</span> Manage Users</div>
   </div>
   <button class="nav-logout" onclick="logout()">🚪 Logout</button>
 </div>
 
 <script>
-// ═══════════════════════════════════════════════════════
+// ══════════════════════════════════════════════
 //  CONFIG
-// ═══════════════════════════════════════════════════════
-
-// IMPORTANT: Replace this URL with your deployed Google Apps Script URL
-const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbyu3gFBJ0oEpnZ4GbhbcRVs8UmnZzr_ZzDezIhR57NmixlyKjGp3TbjweDfaQW_-zBM/exec';
+// ══════════════════════════════════════════════
+const SCRIPT_URL = 'YOUR_GOOGLE_APPS_SCRIPT_URL_HERE';
 
 const DIVISIONS = [
-  { group: 'Pre-Primary', items: ['UKG'] },
-  { group: 'Class 1',     items: ['1A','1B'] },
-  { group: 'Class 2',     items: ['2A','2B','2C'] },
-  { group: 'Class 3',     items: ['3A','3B','3C'] },
-  { group: 'Class 4',     items: ['4A','4B'] },
-  { group: 'Class 5',     items: ['5A','5B'] },
-  { group: 'Class 6',     items: ['6'] },
-  { group: 'Class 7',     items: ['7'] },
-  { group: 'Class 8',     items: ['8'] },
+  { group:'Pre-Primary', items:['UKG'] },
+  { group:'Class 1',     items:['1A','1B'] },
+  { group:'Class 2',     items:['2A','2B','2C'] },
+  { group:'Class 3',     items:['3A','3B','3C'] },
+  { group:'Class 4',     items:['4A','4B'] },
+  { group:'Class 5',     items:['5A','5B'] },
+  { group:'Class 6',     items:['6'] },
+  { group:'Class 7',     items:['7'] },
+  { group:'Class 8',     items:['8'] },
 ];
 
+// FIX 7: Correct academic year months — June to May only
+// year:1 = current calendar year, year:2 = next calendar year
+// Academic year starts June. If current month is Jan-May, we're in year2 of the cycle.
 const MONTHS = [
   { key:'June',      label:'Jun', year:1 },
   { key:'July',      label:'Jul', year:1 },
@@ -1099,94 +446,78 @@ const FEE = 400;
 const INST = 'Thaqwa Madrasa';
 const LOC  = 'Fort Kochi';
 
-// ═══════════════════════════════════════════════════════
+// ══════════════════════════════════════════════
 //  STATE
-// ═══════════════════════════════════════════════════════
-
+// ══════════════════════════════════════════════
 let state = {
-  user: null,           // { name, role }
+  user: null,
   division: null,
-  students: [],         // [{ id, name }]
-  payments: {},         // { studentId: { Month: true/false } }
+  students: [],       // [{ id, name, guardian, whatsapp }]
+  payments: {},
   selectedStudents: new Set(),
   selectedMonths: new Set(),
-  receiptQueue: [],     // students to process receipts for
+  receiptQueue: [],
   receiptIndex: 0,
   loginAttempts: 0,
   lockUntil: 0,
+  editingStudentId: null,
 };
 
-// For DEMO mode (when SCRIPT_URL is placeholder)
-const DEMO_STUDENTS = {
-  'UKG':['TM0001,Aisha Fathima','TM0002,Rahul Krishnan','TM0003,Sana Banu'],
-  '1A': ['TM0004,Mohammed Riyaz','TM0005,Priya Suresh','TM0006,Hafsa Khatun'],
-  '1B': ['TM0007,Arun Kumar','TM0008,Nida Fathima','TM0009,Sreelakshmi P'],
-  '2A': ['TM0010,Abdul Hamid','TM0011,Kavya Nair'],
-  '2B': ['TM0012,Imran Khan','TM0013,Divya R'],
-  '2C': ['TM0014,Fathima Zehra'],
-  '3A': ['TM0015,Rohith S'],
-  '3B': [],
-  '3C': [],
-  '4A': [],
-  '4B': [],
-  '5A': [],
-  '5B': [],
-  '6':  [],
-  '7':  [],
-  '8':  [],
-};
+// ── FIX 4: Student ID pattern ─────────────────
+function generateStudentId(division, existingStudents) {
+  const count = (existingStudents || []).length + 1;
+  const seq = String(count).padStart(3, '0');
+  // UKG → UKG001
+  if (division === 'UKG') return `UKG${seq}`;
+  // Bridge Batch → BB001
+  if (division === 'BB') return `BB${seq}`;
+  // Class 6,7,8 (no division letter) → 6X001, 7X001, 8X001
+  if (['6','7','8'].includes(division)) return `${division}X${seq}`;
+  // Girls batch: if division ends in G e.g. 4G → 4G001
+  // Standard divisions: 1A, 2B, 3C etc → 1A001
+  return `${division}${seq}`;
+}
+
+// ══════════════════════════════════════════════
+//  DEMO MODE
+// ══════════════════════════════════════════════
 const DEMO_USERS = [
-  {name:'Illyas Moulavi', pin:'1111', role:'Principal'},
-  {name:'Rafik Sait',     pin:'1234', role:'Management'},
-  {name:'Mohammed Basheer',pin:'0000',role:'Management'},
-  {name:'Abdul Nasar',    pin:'2020', role:'Management'},
-  {name:'Sabir Moulavi',  pin:'2222', role:'Teacher'},
-  {name:'Ibrahim Moulavi',pin:'3333', role:'Teacher'},
-  {name:'Usama Moulavi',  pin:'4444', role:'Teacher'},
-  {name:'Shahil Moulavi', pin:'5555', role:'Teacher'},
-  {name:'Ahliya Ibrahim', pin:'6666', role:'Teacher'},
-  {name:'Ahliya Nisar',   pin:'7777', role:'Teacher'},
+  {name:'Illyas Moulavi',   pin:'1111', role:'Principal'},
+  {name:'Rafik Sait',       pin:'1234', role:'Management'},
+  {name:'Mohammed Basheer', pin:'0000', role:'Management'},
+  {name:'Abdul Nasar',      pin:'2020', role:'Management'},
+  {name:'Sabir Moulavi',    pin:'2222', role:'Teacher'},
+  {name:'Ibrahim Moulavi',  pin:'3333', role:'Teacher'},
+  {name:'Usama Moulavi',    pin:'4444', role:'Teacher'},
+  {name:'Shahil Moulavi',   pin:'5555', role:'Teacher'},
+  {name:'Ahliya Ibrahim',   pin:'6666', role:'Teacher'},
+  {name:'Ahliya Nisar',     pin:'7777', role:'Teacher'},
 ];
-let demoPayments = JSON.parse(localStorage.getItem('demo_payments')||'{}');
-let demoStudents = JSON.parse(localStorage.getItem('demo_students')||'null');
-if (!demoStudents) {
-  demoStudents = {};
-  Object.keys(DEMO_STUDENTS).forEach(div => {
-    demoStudents[div] = DEMO_STUDENTS[div].map(s => {
-      const [id,name] = s.split(',');
-      return {id, name};
-    });
-  });
-}
-let demoReceiptCounter = parseInt(localStorage.getItem('demo_receipt')||'1000');
+
+let demoPayments  = JSON.parse(localStorage.getItem('tm_payments') || '{}');
+let demoStudents  = JSON.parse(localStorage.getItem('tm_students') || '{}');
+let demoReceipt   = parseInt(localStorage.getItem('tm_receipt') || '1000');
+
 function saveDemoState() {
-  localStorage.setItem('demo_payments', JSON.stringify(demoPayments));
-  localStorage.setItem('demo_students', JSON.stringify(demoStudents));
-  localStorage.setItem('demo_receipt', String(demoReceiptCounter));
+  localStorage.setItem('tm_payments', JSON.stringify(demoPayments));
+  localStorage.setItem('tm_students', JSON.stringify(demoStudents));
+  localStorage.setItem('tm_receipt',  String(demoReceipt));
 }
 
-const isDemo = () => SCRIPT_URL === 'YOUR_GOOGLE_APPS_SCRIPT_URL_HERE';
+const isDemo = () => SCRIPT_URL === 'https://script.google.com/macros/s/AKfycbyu3gFBJ0oEpnZ4GbhbcRVs8UmnZzr_ZzDezIhR57NmixlyKjGp3TbjweDfaQW_-zBM/exec';
 
-// ═══════════════════════════════════════════════════════
+// ══════════════════════════════════════════════
 //  API
-// ═══════════════════════════════════════════════════════
-
+// ══════════════════════════════════════════════
 async function api(action, payload = {}) {
   if (isDemo()) return demoApi(action, payload);
   showLoading(true);
   try {
-    const params = new URLSearchParams({
-      action,
-      payload: JSON.stringify(payload)
-    });
-    const resp = await fetch(`${SCRIPT_URL}?${params.toString()}`, {
-      method: 'GET',
-      redirect: 'follow',
-    });
-    const data = await resp.json();
-    return data;
-  } catch (e) {
-    return { success: false, error: 'Network error. Check connection.' };
+    const params = new URLSearchParams({ action, payload: JSON.stringify(payload) });
+    const resp = await fetch(`${SCRIPT_URL}?${params}`, { method:'GET', redirect:'follow' });
+    return await resp.json();
+  } catch(e) {
+    return { success:false, error:'Network error. Check your connection.' };
   } finally {
     showLoading(false);
   }
@@ -1199,177 +530,149 @@ function demoApi(action, payload) {
       return u ? {success:true, user:{name:u.name,role:u.role}} : {success:false,error:'Invalid PIN'};
     }
     case 'getStudents': {
-      return {success:true, students: demoStudents[payload.division]||[]};
+      return { success:true, students: demoStudents[payload.division] || [] };
     }
     case 'getPayments': {
-      const div = payload.division;
       const p = {};
-      (demoStudents[div]||[]).forEach(s => {
+      (demoStudents[payload.division]||[]).forEach(s => {
         p[s.id] = {};
-        MONTHS.forEach(m => { p[s.id][m.key] = !!(demoPayments[`${div}__${s.id}__${m.key}`]); });
+        MONTHS.forEach(m => { p[s.id][m.key] = !!(demoPayments[`${payload.division}__${s.id}__${m.key}`]); });
       });
-      return {success:true, payments:p};
+      return { success:true, payments:p };
     }
     case 'addStudent': {
-      demoReceiptCounter++;
-      const id = `TM${String(demoReceiptCounter).padStart(4,'0')}`;
-      if (!demoStudents[payload.division]) demoStudents[payload.division] = [];
-      demoStudents[payload.division].push({id, name:payload.name});
+      const div = payload.division;
+      if (!demoStudents[div]) demoStudents[div] = [];
+      const id = generateStudentId(div, demoStudents[div]);
+      demoStudents[div].push({ id, name:payload.name, guardian:payload.guardian||'—', whatsapp:payload.whatsapp||'' });
       saveDemoState();
-      return {success:true, studentId:id, studentName:payload.name};
+      return { success:true, studentId:id, studentName:payload.name };
+    }
+    case 'editStudent': {
+      const div = payload.division;
+      const idx = (demoStudents[div]||[]).findIndex(s => s.id === payload.studentId);
+      if (idx !== -1) {
+        demoStudents[div][idx].name     = payload.name;
+        demoStudents[div][idx].guardian = payload.guardian||'—';
+        demoStudents[div][idx].whatsapp = payload.whatsapp||'';
+        saveDemoState();
+        return { success:true };
+      }
+      return { success:false, error:'Student not found' };
     }
     case 'removeStudent': {
       const div = payload.division;
       demoStudents[div] = (demoStudents[div]||[]).filter(s => s.id !== payload.studentId);
+      Object.keys(demoPayments).forEach(k => { if(k.startsWith(`${div}__${payload.studentId}__`)) delete demoPayments[k]; });
       saveDemoState();
-      return {success:true};
+      return { success:true };
     }
     case 'recordPayments': {
-      const {division,studentId,months} = payload;
-      months.forEach(m => {
-        demoPayments[`${division}__${studentId}__${m}`] = true;
-      });
-      demoReceiptCounter++;
-      const receiptNo = `TM-${new Date().getFullYear()}-${String(demoReceiptCounter).padStart(4,'0')}`;
+      const { division, studentId, months } = payload;
+      months.forEach(m => { demoPayments[`${division}__${studentId}__${m}`] = true; });
+      demoReceipt++;
       saveDemoState();
-      const totalPaid = Object.keys(demoPayments)
-        .filter(k=>k.startsWith(`${division}__${studentId}__`)).length * FEE;
       const now = new Date();
       return {
-        success:true, receiptNo,
+        success: true,
+        receiptNo: `TM-${now.getFullYear()}-${String(demoReceipt).padStart(4,'0')}`,
         date: now.toLocaleDateString('en-IN',{day:'2-digit',month:'short',year:'numeric'}),
         time: now.toLocaleTimeString('en-IN',{hour:'2-digit',minute:'2-digit',hour12:true}),
-        totalPaid, balance: 4800 - totalPaid
       };
     }
-    default: return {success:false, error:'Unknown action'};
+    default: return { success:false, error:'Unknown action' };
   }
 }
 
-// ═══════════════════════════════════════════════════════
+// ══════════════════════════════════════════════
 //  PIN LOGIN
-// ═══════════════════════════════════════════════════════
-
+// ══════════════════════════════════════════════
 let pinValue = '';
 
 function pinPress(d) {
-  if (pinValue.length >= 4) return;
-  if (isLocked()) return;
+  if (pinValue.length >= 4 || isLocked()) return;
   pinValue += d;
   updatePinDots();
   if (pinValue.length === 4) setTimeout(pinSubmit, 200);
 }
-
 function pinClear() {
   pinValue = pinValue.slice(0,-1);
   updatePinDots();
   document.getElementById('loginError').textContent = '';
 }
-
 function updatePinDots() {
-  for (let i = 0; i < 4; i++) {
-    document.getElementById(`dot${i}`).classList.toggle('filled', i < pinValue.length);
-  }
+  for(let i=0;i<4;i++) document.getElementById(`dot${i}`).classList.toggle('filled', i < pinValue.length);
 }
-
 function isLocked() {
   if (state.lockUntil && Date.now() < state.lockUntil) {
-    const secs = Math.ceil((state.lockUntil - Date.now()) / 1000);
-    document.getElementById('loginAttemptInfo').textContent = `Locked for ${secs}s`;
+    const s = Math.ceil((state.lockUntil - Date.now()) / 1000);
+    document.getElementById('loginAttemptInfo').textContent = `Locked for ${s}s`;
     return true;
   }
+  document.getElementById('loginAttemptInfo').textContent = '';
   return false;
 }
-
 async function pinSubmit() {
-  if (isLocked()) return;
-  if (pinValue.length !== 4) { showError('Enter 4-digit PIN'); return; }
-
+  if (isLocked() || pinValue.length !== 4) return;
   showLoading(true);
   const res = await api('login', { pin: pinValue });
   showLoading(false);
-
   if (res.success) {
     state.user = res.user;
     state.loginAttempts = 0;
-    pinValue = '';
-    updatePinDots();
+    pinValue = ''; updatePinDots();
     document.getElementById('loginError').textContent = '';
-    document.getElementById('loginAttemptInfo').textContent = '';
     enterHome();
   } else {
     state.loginAttempts++;
-    pinValue = '';
-    updatePinDots();
+    pinValue = ''; updatePinDots();
     if (state.loginAttempts >= 3) {
-      state.lockUntil = Date.now() + 10 * 60 * 1000;
+      state.lockUntil = Date.now() + 10*60*1000;
       state.loginAttempts = 0;
-      showError('Too many attempts. Locked for 10 minutes.');
+      document.getElementById('loginError').textContent = 'Too many attempts. Locked for 10 minutes.';
     } else {
-      showError(`Wrong PIN. ${3 - state.loginAttempts} attempt(s) left.`);
+      document.getElementById('loginError').textContent = `Wrong PIN. ${3-state.loginAttempts} attempt(s) left.`;
+      const card = document.querySelector('.login-card');
+      card.style.animation='none'; card.offsetHeight; card.style.animation='shake 0.4s ease';
     }
   }
 }
 
-function showError(msg) {
-  document.getElementById('loginError').textContent = msg;
-  // Shake animation
-  const card = document.querySelector('.login-card');
-  card.style.animation = 'none';
-  card.offsetHeight;
-  card.style.animation = 'shake 0.4s ease';
-}
-
-// ═══════════════════════════════════════════════════════
+// ══════════════════════════════════════════════
 //  NAVIGATION
-// ═══════════════════════════════════════════════════════
-
+// ══════════════════════════════════════════════
 function showScreen(id) {
-  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+  document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));
   document.getElementById(id).classList.add('active');
 }
-
 function enterHome() {
   showScreen('homeScreen');
   const u = state.user;
-  document.getElementById('welcomeName').textContent = `Welcome, ${u.name.split(' ')[0]}!`;
+  document.getElementById('welcomeName').textContent   = `Welcome, ${u.name.split(' ')[0]}!`;
   document.getElementById('headerUsername').textContent = u.name.split(' ')[0];
-  document.getElementById('headerAvatar').textContent = u.name[0];
-  document.getElementById('navUserName').textContent = u.name;
-  document.getElementById('navUserRole').textContent = u.role;
-  if (['Principal','Management'].includes(u.role)) {
-    document.getElementById('navUsersItem').style.display = 'flex';
-  }
+  document.getElementById('headerAvatar').textContent   = u.name[0];
+  document.getElementById('navUserName').textContent    = u.name;
+  document.getElementById('navUserRole').textContent    = u.role;
+  if (['Principal','Management'].includes(u.role)) document.getElementById('navUsersItem').style.display='flex';
   if (isDemo()) showToast('🔧 Demo Mode — data saves locally','');
   renderDivisions();
 }
-
 function goHome() {
-  state.division = null;
-  state.selectedStudents.clear();
-  state.selectedMonths.clear();
-  showScreen('homeScreen');
-  renderDivisions();
+  state.division=null; state.selectedStudents.clear(); state.selectedMonths.clear();
+  document.getElementById('searchInput').value='';
+  showScreen('homeScreen'); renderDivisions();
 }
-
 function logout() {
-  state.user = null;
-  state.division = null;
-  state.selectedStudents.clear();
-  state.selectedMonths.clear();
-  closeNav();
-  pinValue = '';
-  updatePinDots();
-  showScreen('loginScreen');
+  state.user=null; state.division=null;
+  state.selectedStudents.clear(); state.selectedMonths.clear();
+  closeNav(); pinValue=''; updatePinDots(); showScreen('loginScreen');
 }
-
-function openNav() { document.getElementById('navMenu').classList.add('open'); document.getElementById('navOverlay').classList.add('open'); }
+function openNav()  { document.getElementById('navMenu').classList.add('open');    document.getElementById('navOverlay').classList.add('open'); }
 function closeNav() { document.getElementById('navMenu').classList.remove('open'); document.getElementById('navOverlay').classList.remove('open'); }
 
-// ═══════════════════════════════════════════════════════
+// ══════════════════════════════════════════════
 //  HOME — DIVISIONS
-// ═══════════════════════════════════════════════════════
-
+// ══════════════════════════════════════════════
 function renderDivisions() {
   const container = document.getElementById('divisionList');
   container.innerHTML = '';
@@ -1380,15 +683,11 @@ function renderDivisions() {
     const grid = document.createElement('div');
     grid.className = 'division-grid';
     group.items.forEach(div => {
-      const count = isDemo()
-        ? (demoStudents[div]||[]).length
-        : '—';
+      // FIX 8: Always read live count from demoStudents
+      const count = isDemo() ? (demoStudents[div]||[]).length : '—';
       const btn = document.createElement('div');
       btn.className = 'division-btn';
-      btn.innerHTML = `
-        <div class="div-name">${div}</div>
-        <div class="div-count">${count} students</div>
-      `;
+      btn.innerHTML = `<div class="div-name">${div}</div><div class="div-count">${count} student${count!==1?'s':''}</div>`;
       btn.onclick = () => openDivision(div);
       grid.appendChild(btn);
     });
@@ -1397,46 +696,61 @@ function renderDivisions() {
   });
 }
 
-// ═══════════════════════════════════════════════════════
+// ══════════════════════════════════════════════
 //  STUDENT SCREEN
-// ═══════════════════════════════════════════════════════
-
+// ══════════════════════════════════════════════
 async function openDivision(div) {
   state.division = div;
   state.selectedStudents.clear();
   state.selectedMonths.clear();
+  document.getElementById('searchInput').value = '';
   showScreen('studentScreen');
   document.getElementById('studentScreenTitle').textContent = `Class ${div}`;
-  document.getElementById('studentScreenSub').textContent = 'Select month(s) then students';
-
+  document.getElementById('studentScreenSub').textContent   = 'Select month(s) then students';
   renderMonthStrip();
   autoSelectCurrentMonth();
-
   showLoading(true);
   const [sRes, pRes] = await Promise.all([
-    api('getStudents', { division: div }),
-    api('getPayments', { division: div })
+    api('getStudents', { division:div }),
+    api('getPayments', { division:div }),
   ]);
   showLoading(false);
-
   if (sRes.success) state.students = sRes.students;
   if (pRes.success) state.payments = pRes.payments;
-
   renderStudents();
   updateBar();
 }
 
-// ─── Month strip ───────────────────────────────────
+// ── FIX 7: Correct month auto-selection ──────
+function autoSelectCurrentMonth() {
+  const now = new Date();
+  const jsMonth = now.getMonth(); // 0=Jan,1=Feb,...,5=Jun,...,11=Dec
+  // Academic year: Jun(idx0)...Dec(idx6), Jan(idx7)...May(idx11)
+  // Map JS month → MONTHS array index
+  //  Jun=5→0, Jul=6→1, Aug=7→2, Sep=8→3, Oct=9→4, Nov=10→5, Dec=11→6
+  //  Jan=0→7, Feb=1→8, Mar=2→9, Apr=3→10, May=4→11
+  const jsToAcademic = {5:0,6:1,7:2,8:3,9:4,10:5,11:6,0:7,1:8,2:9,3:10,4:11};
+  const idx = jsToAcademic[jsMonth];
+  // Only auto-select if within the academic year range (never select future months)
+  if (idx !== undefined) state.selectedMonths.add(MONTHS[idx].key);
+}
+
 function renderMonthStrip() {
   const strip = document.getElementById('monthStrip');
   strip.innerHTML = '';
   const now = new Date();
-  const yr = now.getFullYear();
+  const yr  = now.getFullYear();
+  // FIX 7: Determine academic year base
+  // If current month is Jun-Dec: year1=this year, year2=next year
+  // If current month is Jan-May: year1=last year, year2=this year
+  const jsMonth = now.getMonth();
+  const baseYear = (jsMonth >= 5) ? yr : yr - 1; // June=5
+
   MONTHS.forEach(m => {
+    const displayYear = m.year === 1 ? baseYear : baseYear + 1;
     const chip = document.createElement('div');
     chip.className = 'month-chip' + (state.selectedMonths.has(m.key) ? ' selected' : '');
     chip.dataset.key = m.key;
-    const displayYear = m.year === 1 ? yr : yr + 1;
     chip.textContent = `${m.label} '${String(displayYear).slice(2)}`;
     chip.onclick = () => toggleMonth(m.key);
     strip.appendChild(chip);
@@ -1446,53 +760,36 @@ function renderMonthStrip() {
 function toggleMonth(key) {
   if (state.selectedMonths.has(key)) state.selectedMonths.delete(key);
   else state.selectedMonths.add(key);
-  renderMonthStrip();
-  renderStudents();
-  updateBar();
+  renderMonthStrip(); renderStudents(); updateBar();
 }
 
-function autoSelectCurrentMonth() {
-  const now = new Date();
-  const jsMonth = now.getMonth(); // 0=Jan
-  const map = [7,8,9,10,11,0,1,2,3,4,5,6]; // Jan→idx7 (January in our list)
-  const idx = map[jsMonth];
-  state.selectedMonths.add(MONTHS[idx].key);
-}
-
-// ─── Student cards ─────────────────────────────────
 function renderStudents() {
   const container = document.getElementById('studentCards');
   const query = document.getElementById('searchInput').value.toLowerCase();
   const filtered = state.students.filter(s => s.name.toLowerCase().includes(query));
-
   if (filtered.length === 0) {
-    container.innerHTML = `<div class="empty-msg"><div class="empty-icon">👥</div><p>${state.students.length === 0 ? 'No students yet.<br>Tap "+ Add" to add students.' : 'No results found.'}</p></div>`;
+    container.innerHTML = `<div class="empty-msg"><div class="empty-icon">👥</div><p>${state.students.length===0?'No students yet.<br>Tap "+ Add" to add students.':'No results found.'}</p></div>`;
     return;
   }
-
   container.innerHTML = '';
   filtered.forEach(s => {
-    // Check if already paid for ALL selected months
     const selMonths = [...state.selectedMonths];
-    const allPaid = selMonths.length > 0 && selMonths.every(m => state.payments[s.id]?.[m]);
+    const allPaid  = selMonths.length>0 && selMonths.every(m => state.payments[s.id]?.[m]);
     const somePaid = selMonths.some(m => state.payments[s.id]?.[m]);
     const selected = state.selectedStudents.has(s.id);
-
     const card = document.createElement('div');
-    card.className = 'student-card' + (allPaid ? ' already-paid' : (selected ? ' selected' : ''));
-
+    card.className = 'student-card'+(allPaid?' already-paid':(selected?' selected':''));
     let badge = '';
-    if (allPaid) badge = '<span class="paid-badge">All Paid</span>';
+    if (allPaid)      badge = '<span class="paid-badge">All Paid</span>';
     else if (somePaid) badge = '<span class="paid-badge" style="background:var(--gold);color:var(--navy)">Partial</span>';
-
+    const waLine = s.whatsapp ? `<div class="s-wa">📱 ${s.whatsapp}</div>` : '';
     card.innerHTML = `
-      <div class="s-checkbox">${(selected || allPaid) ? '✓' : ''}</div>
+      <div class="s-checkbox">${(selected||allPaid)?'✓':''}</div>
       <div class="s-info">
         <div class="s-name">${s.name}</div>
         <div class="s-id">${s.id}</div>
-      </div>
-      ${badge}
-    `;
+        ${waLine}
+      </div>${badge}`;
     if (!allPaid) card.onclick = () => toggleStudent(s.id);
     container.appendChild(card);
   });
@@ -1501,143 +798,151 @@ function renderStudents() {
 function toggleStudent(id) {
   if (state.selectedStudents.has(id)) state.selectedStudents.delete(id);
   else state.selectedStudents.add(id);
-  renderStudents();
-  updateBar();
+  renderStudents(); updateBar();
 }
-
 function filterStudents() { renderStudents(); }
-
 function selectAll() {
   state.students.forEach(s => {
-    const selMonths = [...state.selectedMonths];
-    const allPaid = selMonths.length > 0 && selMonths.every(m => state.payments[s.id]?.[m]);
+    const allPaid = [...state.selectedMonths].every(m => state.payments[s.id]?.[m]);
     if (!allPaid) state.selectedStudents.add(s.id);
   });
-  renderStudents();
-  updateBar();
+  renderStudents(); updateBar();
 }
-
-function clearAll() {
-  state.selectedStudents.clear();
-  renderStudents();
-  updateBar();
-}
+function clearAll()  { state.selectedStudents.clear(); renderStudents(); updateBar(); }
 
 function updateBar() {
-  const count = state.selectedStudents.size;
+  const count  = state.selectedStudents.size;
   const months = state.selectedMonths.size;
   const amount = count * months * FEE;
-  const barCount = document.getElementById('barCount');
+  const barCount  = document.getElementById('barCount');
   const barAmount = document.getElementById('barAmount');
   const btn = document.getElementById('recordBtn');
-
-  if (count === 0 || months === 0) {
-    barCount.textContent = months === 0 ? 'Select a month above' : 'No students selected';
+  if (count===0 || months===0) {
+    barCount.textContent  = months===0 ? 'Select a month above' : 'No students selected';
     barAmount.textContent = '';
     btn.disabled = true;
   } else {
-    barCount.textContent = `${count} student${count>1?'s':''} × ${months} month${months>1?'s':''}`;
+    barCount.textContent  = `${count} student${count>1?'s':''} × ${months} month${months>1?'s':''}`;
     barAmount.textContent = `₹${amount.toLocaleString('en-IN')}`;
     btn.disabled = false;
   }
 }
 
-// ─── Add / Manage Students ─────────────────────────
+// ══════════════════════════════════════════════
+//  ADD / EDIT / REMOVE STUDENT
+// ══════════════════════════════════════════════
 function openAddStudent() {
-  document.getElementById('newName').value = '';
+  document.getElementById('newName').value     = '';
   document.getElementById('newGuardian').value = '';
-  document.getElementById('newContact').value = '';
+  document.getElementById('newWhatsapp').value = '';
   openModal('addStudentModal');
-  setTimeout(() => document.getElementById('newName').focus(), 300);
+  setTimeout(()=>document.getElementById('newName').focus(),300);
 }
 
 async function addStudent() {
-  const name = document.getElementById('newName').value.trim();
+  const name     = document.getElementById('newName').value.trim();
+  const guardian = document.getElementById('newGuardian').value.trim();
+  const whatsapp = document.getElementById('newWhatsapp').value.trim();
   if (!name) { showToast('Please enter student name','error'); return; }
-  const res = await api('addStudent', {
-    division: state.division,
-    name,
-    guardian: document.getElementById('newGuardian').value.trim(),
-    contact: document.getElementById('newContact').value.trim(),
-    addedBy: state.user.name
-  });
+  // FIX 5: Validate 10-digit WhatsApp number
+  if (!/^\d{10}$/.test(whatsapp)) { showToast('WhatsApp number must be exactly 10 digits','error'); return; }
+  const res = await api('addStudent', { division:state.division, name, guardian, whatsapp, addedBy:state.user.name });
   if (res.success) {
-    state.students.push({ id: res.studentId, name: res.studentName });
+    state.students.push({ id:res.studentId, name, guardian:guardian||'—', whatsapp });
     state.payments[res.studentId] = {};
     closeModal('addStudentModal');
     renderStudents();
-    renderDivisionsIfHome();
-    showToast(`✅ ${name} added successfully`, 'success');
+    renderDivisions(); // FIX 8: refresh count on home screen
+    showToast(`✅ ${name} added (${res.studentId})`, 'success');
   } else {
-    showToast(res.error || 'Failed to add student', 'error');
+    showToast(res.error || 'Failed to add student','error');
+  }
+}
+
+function openEditStudent(id) {
+  const s = state.students.find(s=>s.id===id);
+  if (!s) return;
+  state.editingStudentId = id;
+  document.getElementById('editStudentInfo').innerHTML = `<strong>${s.id}</strong> — ${state.division}`;
+  document.getElementById('editName').value     = s.name;
+  document.getElementById('editGuardian').value = s.guardian !== '—' ? s.guardian : '';
+  document.getElementById('editWhatsapp').value = s.whatsapp || '';
+  closeModal('manageModal');
+  openModal('editStudentModal');
+}
+
+async function saveEditStudent() {
+  const id       = state.editingStudentId;
+  const name     = document.getElementById('editName').value.trim();
+  const guardian = document.getElementById('editGuardian').value.trim();
+  const whatsapp = document.getElementById('editWhatsapp').value.trim();
+  if (!name) { showToast('Please enter student name','error'); return; }
+  if (!/^\d{10}$/.test(whatsapp)) { showToast('WhatsApp number must be exactly 10 digits','error'); return; }
+  const res = await api('editStudent', { division:state.division, studentId:id, name, guardian, whatsapp });
+  if (res.success) {
+    const idx = state.students.findIndex(s=>s.id===id);
+    if (idx!==-1) { state.students[idx].name=name; state.students[idx].guardian=guardian||'—'; state.students[idx].whatsapp=whatsapp; }
+    closeModal('editStudentModal');
+    renderStudents();
+    showToast('✅ Student updated','success');
+  } else {
+    showToast(res.error||'Failed to update','error');
   }
 }
 
 function openManageStudents() {
-  document.getElementById('manageTitle').textContent = `Students — Class ${state.division}`;
+  document.getElementById('manageTitle').textContent = `Manage Students — ${state.division}`;
   renderManageList();
   openModal('manageModal');
 }
 
 function renderManageList() {
   const list = document.getElementById('manageList');
-  if (state.students.length === 0) {
-    list.innerHTML = '<div class="empty-msg" style="padding:20px 0"><p>No students yet.</p></div>';
+  if (state.students.length===0) {
+    list.innerHTML='<div class="empty-msg" style="padding:20px 0"><p>No students yet.</p></div>';
     return;
   }
-  list.innerHTML = state.students.map(s => `
-    <div class="student-manage-row" style="display:flex;align-items:center;padding:10px 0;border-bottom:1px solid var(--border);gap:10px">
-      <div style="flex:1">
-        <div style="font-weight:700;font-size:0.88rem">${s.name}</div>
-        <div style="font-size:0.7rem;color:var(--text-muted)">${s.id}</div>
+  list.innerHTML = state.students.map(s=>`
+    <div class="manage-row">
+      <div class="manage-row-info">
+        <div class="manage-row-name">${s.name}</div>
+        <div class="manage-row-sub">${s.id}</div>
+        <div class="manage-row-wa">${s.whatsapp ? '📱 '+s.whatsapp : '⚠ No WhatsApp number'}</div>
       </div>
-      <button onclick="removeStudent('${s.id}','${s.name}')"
-        style="background:var(--red-light);border:1px solid var(--red);color:var(--red);border-radius:7px;padding:5px 12px;font-size:0.78rem;font-weight:700;cursor:pointer">
-        Remove
-      </button>
+      <button class="btn-manage btn-edit" onclick="openEditStudent('${s.id}')">✏ Edit</button>
+      <button class="btn-manage btn-remove" onclick="removeStudent('${s.id}','${s.name.replace(/'/g,'')}')">🗑</button>
     </div>
   `).join('');
 }
 
 async function removeStudent(id, name) {
   if (!confirm(`Remove "${name}" from Class ${state.division}?`)) return;
-  const res = await api('removeStudent', { division: state.division, studentId: id });
+  const res = await api('removeStudent', { division:state.division, studentId:id });
   if (res.success) {
-    state.students = state.students.filter(s => s.id !== id);
+    state.students = state.students.filter(s=>s.id!==id);
     delete state.payments[id];
     state.selectedStudents.delete(id);
-    renderManageList();
-    renderStudents();
-    updateBar();
-    showToast(`Removed ${name}`, '');
+    renderManageList(); renderStudents(); updateBar();
+    renderDivisions(); // FIX 8
+    showToast(`Removed ${name}`,'');
   } else {
-    showToast(res.error || 'Error removing student', 'error');
+    showToast(res.error||'Error removing student','error');
   }
 }
 
-// ═══════════════════════════════════════════════════════
-//  PAYMENT PROCESSING + RECEIPTS
-// ═══════════════════════════════════════════════════════
-
-function openStudentSelect() {
-  if (state.selectedStudents.size === 0 || state.selectedMonths.size === 0) return;
+// ══════════════════════════════════════════════
+//  PAYMENT + RECEIPTS
+// ══════════════════════════════════════════════
+function openConfirm() {
+  if (state.selectedStudents.size===0 || state.selectedMonths.size===0) return;
   const months = [...state.selectedMonths];
-  const studentList = [...state.selectedStudents].map(id => {
-    const s = state.students.find(s => s.id === id);
-    return s;
-  }).filter(Boolean);
-
-  document.getElementById('confirmMonths').textContent =
-    months.map(m => MONTHS.find(x=>x.key===m)?.key).join(', ');
-
-  const listEl = document.getElementById('confirmStudentList');
-  listEl.innerHTML = studentList.map(s => `
+  const students = [...state.selectedStudents].map(id=>state.students.find(s=>s.id===id)).filter(Boolean);
+  document.getElementById('confirmMonths').textContent = months.join(', ');
+  document.getElementById('confirmStudentList').innerHTML = students.map(s=>`
     <div style="padding:8px 12px;background:var(--cream);border-radius:8px;margin-bottom:6px;font-size:0.88rem;font-weight:600">
       ${s.name} <span style="color:var(--text-muted);font-weight:400;font-size:0.75rem">${s.id}</span>
-    </div>
-  `).join('');
-
-  state.receiptQueue = studentList;
+    </div>`).join('');
+  state.receiptQueue = students;
   state.receiptIndex = 0;
   openModal('studentSelectModal');
 }
@@ -1645,66 +950,54 @@ function openStudentSelect() {
 async function processNextStudent() {
   closeModal('studentSelectModal');
   if (state.receiptIndex >= state.receiptQueue.length) return;
-
   const student = state.receiptQueue[state.receiptIndex];
-  const months = [...state.selectedMonths];
-
+  const months  = [...state.selectedMonths];
   showLoading(true);
   const res = await api('recordPayments', {
-    division: state.division,
-    studentId: student.id,
-    studentName: student.name,
-    months,
-    teacher: state.user.name,
-    teacherRole: state.user.role,
+    division:state.division, studentId:student.id, studentName:student.name,
+    months, teacher:state.user.name, teacherRole:state.user.role,
   });
   showLoading(false);
-
   if (res.success) {
-    // Update local payment state
     months.forEach(m => {
-      if (!state.payments[student.id]) state.payments[student.id] = {};
+      if (!state.payments[student.id]) state.payments[student.id]={};
       state.payments[student.id][m] = true;
     });
     showReceipt(student, months, res);
   } else {
-    showToast(res.error || 'Error recording payment', 'error');
+    showToast(res.error||'Error recording payment','error');
     state.receiptIndex++;
-    if (state.receiptIndex < state.receiptQueue.length) {
-      setTimeout(processNextStudent, 500);
-    } else {
-      finalizeReceipts();
-    }
+    if (state.receiptIndex < state.receiptQueue.length) setTimeout(processNextStudent,500);
+    else finalizeReceipts();
   }
 }
 
 function showReceipt(student, months, res) {
   const now = new Date();
-  const yr = now.getFullYear();
+  const jsMonth = now.getMonth();
+  const baseYear = (jsMonth >= 5) ? now.getFullYear() : now.getFullYear() - 1;
   const monthLines = months.map(m => {
-    const mObj = MONTHS.find(x => x.key === m);
-    const displayYear = mObj.year === 1 ? yr : yr + 1;
+    const mObj = MONTHS.find(x=>x.key===m);
+    const yr = mObj.year===1 ? baseYear : baseYear+1;
     return `<div class="receipt-month-item">
-      <span class="m-name">✓ ${m} ${displayYear}</span>
+      <span class="m-name">✓ ${m} ${yr}</span>
       <span class="m-amt">₹${FEE.toLocaleString('en-IN')}</span>
     </div>`;
   }).join('');
+  const total = months.length * FEE;
 
-  const totalThisReceipt = months.length * FEE;
-
-  const html = `
+  // FIX 1,2,3: Removed Balance Remaining, Total Paid This Year, Thank you
+  document.getElementById('receiptContent').innerHTML = `
     <div class="receipt-header">
       <div class="receipt-logo">🕌</div>
       <div class="receipt-inst">${INST}</div>
       <div class="receipt-loc">${LOC}</div>
       <span class="receipt-title">Fee Receipt</span>
     </div>
-
     <hr class="receipt-divider">
-
     <div class="receipt-row">
       <span class="r-label">Receipt No</span>
-      <span class="r-value receipt-no">${res.receiptNo}</span>
+      <span class="r-value" style="color:var(--navy);font-weight:800">${res.receiptNo}</span>
     </div>
     <div class="receipt-row">
       <span class="r-label">Date</span>
@@ -1714,9 +1007,7 @@ function showReceipt(student, months, res) {
       <span class="r-label">Time</span>
       <span class="r-value">${res.time}</span>
     </div>
-
     <hr class="receipt-divider">
-
     <div class="receipt-row">
       <span class="r-label">Student Name</span>
       <span class="r-value">${student.name}</span>
@@ -1729,140 +1020,84 @@ function showReceipt(student, months, res) {
       <span class="r-label">Class / Division</span>
       <span class="r-value">${state.division}</span>
     </div>
-
     <hr class="receipt-divider">
-
     <div class="receipt-months">
       <div class="receipt-months-title">Months Paid</div>
       <div class="receipt-month-list">${monthLines}</div>
     </div>
-
     <div class="receipt-total">
       <span class="t-label">Amount Received</span>
-      <span class="t-amount">₹${totalThisReceipt.toLocaleString('en-IN')}</span>
+      <span class="t-amount">₹${total.toLocaleString('en-IN')}</span>
     </div>
-
-    <hr class="receipt-divider" style="margin:12px 0">
-
-    <div class="receipt-row" style="font-size:0.78rem">
-      <span class="r-label">Total Paid This Year</span>
-      <span class="r-value" style="color:var(--green)">₹${res.totalPaid.toLocaleString('en-IN')}</span>
-    </div>
-    <div class="receipt-row" style="font-size:0.78rem">
-      <span class="r-label">Balance Remaining</span>
-      <span class="r-value" style="color:${res.balance > 0 ? 'var(--red)' : 'var(--green)'}">
-        ₹${res.balance.toLocaleString('en-IN')}
-      </span>
-    </div>
-
     <hr class="receipt-divider">
-
     <div class="receipt-row" style="font-size:0.78rem">
       <span class="r-label">Recorded by</span>
       <span class="r-value">${state.user.name}</span>
     </div>
-
-    <div class="receipt-footer">
-      <div>جزاكم الله خيراً — Thank you 🤲</div>
-      <div style="margin-top:4px;font-size:0.7rem;color:var(--border)">${INST} · ${LOC}</div>
-    </div>
-
     <div class="receipt-actions">
-      <button class="btn-receipt whatsapp" onclick="shareWhatsApp('${student.name}','${res.receiptNo}','${months.join(', ')}',${totalThisReceipt})">
+      <button class="btn-receipt whatsapp" onclick="shareWhatsApp('${student.name.replace(/'/g,"\\'")}','${res.receiptNo}','${months.join(', ')}',${total},'${student.whatsapp||''}')">
         <span>📲</span> WhatsApp
       </button>
       <button class="btn-receipt done" onclick="nextReceipt()">
-        ${state.receiptIndex < state.receiptQueue.length - 1 ? 'Next →' : '✅ Done'}
+        ${state.receiptIndex < state.receiptQueue.length-1 ? 'Next →' : '✅ Done'}
       </button>
-    </div>
-  `;
-
-  document.getElementById('receiptContent').innerHTML = html;
+    </div>`;
   openModal('receiptModal');
 }
 
 function nextReceipt() {
   state.receiptIndex++;
   closeModal('receiptModal');
-  if (state.receiptIndex < state.receiptQueue.length) {
-    setTimeout(processNextStudent, 300);
-  } else {
-    finalizeReceipts();
-  }
+  if (state.receiptIndex < state.receiptQueue.length) setTimeout(processNextStudent,300);
+  else finalizeReceipts();
 }
-
 function finalizeReceipts() {
   state.selectedStudents.clear();
-  renderStudents();
-  updateBar();
-  showToast(`✅ All payments recorded`, 'success');
+  renderStudents(); updateBar();
+  showToast('✅ All payments recorded','success');
 }
 
-function shareWhatsApp(name, receiptNo, months, amount) {
+// WhatsApp — opens directly to parent's number if available
+function shareWhatsApp(name, receiptNo, months, amount, waNumber) {
   const text = encodeURIComponent(
 `🕌 *${INST}* — ${LOC}
 
 *Fee Receipt*
 ━━━━━━━━━━━━━━━━━━
-Receipt No: *${receiptNo}*
-Student: *${name}*
-Class: *${state.division}*
-Months: ${months}
+Receipt No : *${receiptNo}*
+Student    : *${name}*
+Class      : *${state.division}*
+Months     : ${months}
 Amount Paid: *₹${amount.toLocaleString('en-IN')}*
 ━━━━━━━━━━━━━━━━━━
-Recorded by: ${state.user.name}
-جزاكم الله خيراً 🤲`
-  );
-  window.open(`https://wa.me/?text=${text}`, '_blank');
+Recorded by: ${state.user.name}`);
+  // If WhatsApp number saved, open directly to that chat
+  const url = waNumber && /^\d{10}$/.test(waNumber)
+    ? `https://wa.me/91${waNumber}?text=${text}`
+    : `https://wa.me/?text=${text}`;
+  window.open(url,'_blank');
 }
 
-// ═══════════════════════════════════════════════════════
+// ══════════════════════════════════════════════
 //  MODAL HELPERS
-// ═══════════════════════════════════════════════════════
-
-function openModal(id) { document.getElementById(id).classList.add('open'); }
+// ══════════════════════════════════════════════
+function openModal(id)  { document.getElementById(id).classList.add('open'); }
 function closeModal(id) { document.getElementById(id).classList.remove('open'); }
-
-// Close modals on backdrop tap
-document.querySelectorAll('.modal-overlay').forEach(overlay => {
-  overlay.addEventListener('click', e => {
-    if (e.target === overlay) overlay.classList.remove('open');
-  });
+document.querySelectorAll('.modal-overlay').forEach(o=>{
+  o.addEventListener('click', e=>{ if(e.target===o) o.classList.remove('open'); });
 });
 
-// ═══════════════════════════════════════════════════════
-//  UI HELPERS
-// ═══════════════════════════════════════════════════════
-
-function showLoading(show) {
-  document.getElementById('loadingOverlay').classList.toggle('show', show);
-}
-
+// ══════════════════════════════════════════════
+//  HELPERS
+// ══════════════════════════════════════════════
+function showLoading(show) { document.getElementById('loadingOverlay').classList.toggle('show',show); }
 let toastTimer;
-function showToast(msg, type = '') {
-  const toast = document.getElementById('toast');
-  toast.textContent = msg;
-  toast.className = `toast show ${type}`;
+function showToast(msg, type='') {
+  const t = document.getElementById('toast');
+  t.textContent = msg; t.className=`toast show ${type}`;
   clearTimeout(toastTimer);
-  toastTimer = setTimeout(() => toast.classList.remove('show'), 3000);
+  toastTimer = setTimeout(()=>t.classList.remove('show'),3200);
 }
-
-function renderDivisionsIfHome() {
-  if (document.getElementById('homeScreen').classList.contains('active')) renderDivisions();
-}
-
-// ─── CSS shake animation ───────────────────────────
-const style = document.createElement('style');
-style.textContent = `
-  @keyframes shake {
-    0%,100%{transform:translateX(0)}
-    20%{transform:translateX(-8px)}
-    40%{transform:translateX(8px)}
-    60%{transform:translateX(-6px)}
-    80%{transform:translateX(6px)}
-  }
-`;
-document.head.appendChild(style);
 </script>
 </body>
 </html>
