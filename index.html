@@ -6,9 +6,9 @@
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-<meta name="apple-mobile-web-app-title" content="Thaqwa Fees">
+<meta name="apple-mobile-web-app-title" content="Thaqwa Madrasa">
 <meta name="theme-color" content="#1A3C5E">
-<title>Thaqwa Madrasa — Fee Collection</title>
+<title>Thaqwa Madrasa</title>
 <link href="https://fonts.googleapis.com/css2?family=Amiri:wght@400;700&family=DM+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 <style>
 :root {
@@ -206,6 +206,42 @@ body{font-family:'DM Sans',sans-serif;background:var(--cream);color:var(--text);
 .nav-logout{margin:0 16px;padding:12px;border-radius:var(--radius-xs);background:rgba(178,34,34,0.25);border:1px solid rgba(178,34,34,0.4);color:#FF8A80;font-family:'DM Sans',sans-serif;font-size:0.88rem;font-weight:700;cursor:pointer;text-align:center;}
 ::-webkit-scrollbar{width:5px;}::-webkit-scrollbar-track{background:transparent;}::-webkit-scrollbar-thumb{background:var(--border);border-radius:10px;}
 @keyframes shake{0%,100%{transform:translateX(0)}20%{transform:translateX(-8px)}40%{transform:translateX(8px)}60%{transform:translateX(-6px)}80%{transform:translateX(6px)}}
+
+/* ══ ATTENDANCE ══════════════════════════════ */
+.att-student-card{background:white;border:1.5px solid var(--border);border-radius:var(--radius-sm);padding:12px 14px;display:flex;align-items:center;gap:12px;transition:all 0.15s;}
+.att-student-card.present{border-color:#5CB87A;background:linear-gradient(135deg,#F0FBF4 0%,#E4F7EC 100%);}
+.att-student-card.absent{border-color:var(--red);background:var(--red-light);}
+.att-toggle{display:flex;border-radius:8px;overflow:hidden;border:1.5px solid var(--border);flex-shrink:0;}
+.att-toggle-btn{padding:6px 12px;font-size:0.75rem;font-weight:800;cursor:pointer;border:none;font-family:'DM Sans',sans-serif;touch-action:manipulation;transition:all 0.15s;background:white;color:var(--text-muted);}
+.att-toggle-btn.active-present{background:#5CB87A;color:white;}
+.att-toggle-btn.active-absent{background:var(--red);color:white;}
+.cancel-reason-btn{width:100%;padding:13px;border-radius:10px;border:1.5px solid var(--border);background:var(--cream);font-family:'DM Sans',sans-serif;font-size:0.9rem;font-weight:700;cursor:pointer;text-align:left;touch-action:manipulation;transition:all 0.15s;}
+.cancel-reason-btn:active{background:var(--cream-dark);}
+.cancel-reason-btn.selected{border-color:var(--navy);background:#EEF5FB;color:var(--navy);}
+.week-day-row{padding:10px 0;border-bottom:1px solid var(--border);}
+.week-day-header{font-size:0.78rem;font-weight:800;color:var(--navy);margin-bottom:6px;display:flex;justify-content:space-between;align-items:center;}
+.week-day-stats{display:flex;gap:6px;flex-wrap:wrap;}
+.stat-chip{font-size:0.7rem;font-weight:700;padding:2px 8px;border-radius:20px;}
+.stat-present{background:var(--green-light);color:var(--green);}
+.stat-absent{background:var(--red-light);color:var(--red);}
+.stat-holiday{background:var(--gold-pale);color:var(--gold);}
+.month-student-row{display:flex;align-items:center;padding:8px 0;border-bottom:1px solid var(--border);gap:8px;font-size:0.82rem;}
+.month-days-strip{display:flex;gap:3px;flex-wrap:wrap;}
+.day-dot{width:22px;height:22px;border-radius:6px;display:flex;align-items:center;justify-content:center;font-size:0.6rem;font-weight:800;}
+.day-dot.p{background:var(--green-light);color:var(--green);}
+.day-dot.a{background:var(--red-light);color:var(--red);}
+.day-dot.h{background:var(--gold-pale);color:var(--gold);}
+.day-dot.n{background:var(--cream-dark);color:var(--text-muted);}
+/* Module switcher on home */
+.module-tabs{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:20px;}
+.module-tab{background:white;border:2px solid var(--border);border-radius:var(--radius);padding:18px 12px;display:flex;flex-direction:column;align-items:center;gap:6px;cursor:pointer;transition:all 0.15s;touch-action:manipulation;}
+.module-tab:active{transform:scale(0.97);}
+.module-tab.active-tab{border-color:var(--navy);background:var(--navy);}
+.module-tab .mt-icon{font-size:1.8rem;}
+.module-tab .mt-label{font-size:0.85rem;font-weight:800;color:var(--navy);}
+.module-tab.active-tab .mt-label{color:white;}
+.module-tab .mt-sub{font-size:0.68rem;color:var(--text-muted);}
+.module-tab.active-tab .mt-sub{color:rgba(255,255,255,0.6);}
 </style>
 </head>
 <body>
@@ -262,11 +298,22 @@ body{font-family:'DM Sans',sans-serif;background:var(--cream);color:var(--text);
       <div class="welcome-icon">👋</div>
       <div class="welcome-text">
         <h3 id="welcomeName">Welcome!</h3>
-        <p>Select a division to record fee payments</p>
+        <p id="homeWelcomeSub">Select a module to get started</p>
       </div>
     </div>
-    <div class="section-label">All Divisions</div>
-    <div id="divisionList"></div>
+    <!-- Module selector -->
+    <div class="module-tabs">
+      <div class="module-tab" onclick="openFeeModule()">
+        <div class="mt-icon">💰</div>
+        <div class="mt-label">Fee Collection</div>
+        <div class="mt-sub">Record & track fees</div>
+      </div>
+      <div class="module-tab" onclick="openAttModule()">
+        <div class="mt-icon">📅</div>
+        <div class="mt-label">Attendance</div>
+        <div class="mt-sub">Mark daily attendance</div>
+      </div>
+    </div>
   </div>
 </div>
 
@@ -390,6 +437,148 @@ body{font-family:'DM Sans',sans-serif;background:var(--cream);color:var(--text);
   </div>
 </div>
 
+<!-- ATTENDANCE HOME SCREEN -->
+<div class="screen" id="attHomeScreen">
+  <div class="app-header">
+    <button class="header-back" onclick="goMainHome()">←</button>
+    <div class="header-info">
+      <div class="header-title">📅 Attendance</div>
+      <div class="header-sub" id="attDateDisplay">Today</div>
+    </div>
+    <button class="header-back" style="margin-left:8px" onclick="openNav()">☰</button>
+  </div>
+  <div class="home-body">
+    <div class="home-welcome" style="background:linear-gradient(135deg,#E8F5E9 0%,#F1F8E9 100%);border-color:#A5D6A7;">
+      <div class="welcome-icon">📅</div>
+      <div class="welcome-text">
+        <h3 id="attWelcomeName">Attendance</h3>
+        <p id="attWelcomeSub">Select a division to mark attendance</p>
+      </div>
+    </div>
+    <!-- Date navigation -->
+    <div id="attDateNav" style="background:white;border-radius:14px;border:1px solid var(--border);padding:14px;margin-bottom:16px;box-shadow:var(--shadow-sm);">
+      <div style="font-size:0.72rem;font-weight:800;text-transform:uppercase;letter-spacing:0.08em;color:var(--text-muted);margin-bottom:10px;">Date</div>
+      <div style="display:flex;align-items:center;gap:10px;">
+        <button onclick="attChangeDate(-1)" style="width:36px;height:36px;border-radius:10px;border:1.5px solid var(--border);background:white;font-size:1.1rem;cursor:pointer;touch-action:manipulation;">‹</button>
+        <div style="flex:1;text-align:center;">
+          <div style="font-size:1rem;font-weight:800;color:var(--navy)" id="attSelectedDate">—</div>
+          <div style="font-size:0.72rem;color:var(--text-muted)" id="attSelectedDay">—</div>
+        </div>
+        <button onclick="attChangeDate(1)" id="attNextBtn" style="width:36px;height:36px;border-radius:10px;border:1.5px solid var(--border);background:white;font-size:1.1rem;cursor:pointer;touch-action:manipulation;">›</button>
+      </div>
+      <div style="display:flex;gap:8px;margin-top:10px;">
+        <button onclick="attGoToday()" class="btn-xs" style="flex:1;text-align:center;">Today</button>
+        <button onclick="openWeekView()" class="btn-xs" style="flex:1;text-align:center;">Week View</button>
+        <button onclick="openMonthView()" class="btn-xs" style="flex:1;text-align:center;">Month View</button>
+      </div>
+    </div>
+    <div class="section-label">Select Division</div>
+    <div id="attDivisionList"></div>
+  </div>
+</div>
+
+<!-- ATTENDANCE MARK SCREEN -->
+<div class="screen" id="attMarkScreen">
+  <div class="app-header">
+    <button class="header-back" onclick="goAttHome()">←</button>
+    <div class="header-info">
+      <div class="header-title" id="attMarkTitle">Class 1A</div>
+      <div class="header-sub" id="attMarkSub">Mark attendance</div>
+    </div>
+    <button class="btn-xs" style="font-size:0.75rem;color:white;background:rgba(178,34,34,0.3);border-color:rgba(178,34,34,0.5)" onclick="openCancelClass()">Cancel Class</button>
+  </div>
+  <div class="page-body">
+    <!-- Status if class cancelled -->
+    <div id="attCancelledBanner" style="display:none;background:var(--red-light);border:1.5px solid var(--red);border-radius:12px;padding:14px;margin-bottom:14px;text-align:center;">
+      <div style="font-size:1.2rem;margin-bottom:4px;">🚫</div>
+      <div style="font-weight:800;color:var(--red);font-size:0.9rem" id="attCancelledReason">Class Cancelled</div>
+      <div style="font-size:0.75rem;color:var(--text-muted);margin-top:4px" id="attCancelledBy">—</div>
+      <button onclick="undoCancelClass()" id="attUndoBtn" style="margin-top:10px;padding:6px 16px;border-radius:8px;border:1px solid var(--red);background:white;color:var(--red);font-size:0.78rem;font-weight:700;cursor:pointer;">Undo</button>
+    </div>
+
+    <!-- Quick actions -->
+    <div id="attQuickActions" style="display:flex;gap:8px;margin-bottom:14px;">
+      <button onclick="markAllPresent()" class="btn-xs primary" style="flex:1;text-align:center;">✅ All Present</button>
+      <button onclick="markAllAbsent()" class="btn-xs" style="flex:1;text-align:center;">❌ All Absent</button>
+      <button onclick="clearAttMarks()" class="btn-xs" style="flex:1;text-align:center;">Clear</button>
+    </div>
+
+    <!-- Student attendance cards -->
+    <div id="attStudentCards" style="display:flex;flex-direction:column;gap:8px;"></div>
+  </div>
+
+  <!-- Sticky save bar -->
+  <div class="sticky-bar">
+    <div class="bar-info">
+      <div class="bar-count" id="attBarCount">—</div>
+      <div class="bar-amount" id="attBarSub" style="font-size:0.78rem;color:var(--text-muted);font-weight:600;"></div>
+    </div>
+    <button class="btn-record" id="attSaveBtn" onclick="saveAttendance()">💾 Save</button>
+  </div>
+</div>
+
+<!-- CANCEL CLASS MODAL -->
+<div class="modal-overlay" id="cancelClassModal">
+  <div class="modal-sheet">
+    <div class="modal-handle"></div>
+    <div class="modal-form">
+      <h2>Mark Class as Cancelled</h2>
+      <p style="font-size:0.82rem;color:var(--text-muted);margin-bottom:16px">Select the reason for cancellation:</p>
+      <div id="cancelReasonList" style="display:flex;flex-direction:column;gap:10px;margin-bottom:20px;">
+        <button onclick="selectCancelReason('Heavy Rain 🌧')" class="cancel-reason-btn">🌧 Heavy Rain</button>
+        <button onclick="selectCancelReason('Public Holiday 🎉')" class="cancel-reason-btn">🎉 Public Holiday</button>
+        <button onclick="selectCancelReason('Teacher Training 📚')" class="cancel-reason-btn">📚 Teacher Training</button>
+        <button onclick="selectCancelReason('Other Reason')" class="cancel-reason-btn">📝 Other Reason</button>
+      </div>
+      <div id="otherReasonWrap" style="display:none;margin-bottom:16px;">
+        <input type="text" id="otherReasonInput" placeholder="Specify reason..." style="width:100%;padding:11px 14px;border-radius:8px;border:1.5px solid var(--border);font-family:'DM Sans',sans-serif;font-size:0.9rem;outline:none;">
+      </div>
+      <button class="btn-full secondary" onclick="closeModal('cancelClassModal')">Cancel</button>
+    </div>
+  </div>
+</div>
+
+<!-- WEEK VIEW MODAL -->
+<div class="modal-overlay" id="weekViewModal">
+  <div class="modal-sheet" style="max-height:95vh;">
+    <div class="modal-handle"></div>
+    <div class="modal-form">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;">
+        <h2 style="margin:0">Weekly View</h2>
+        <button onclick="closeModal('weekViewModal')" style="background:none;border:none;font-size:1.2rem;cursor:pointer;color:var(--text-muted);">✕</button>
+      </div>
+      <div style="display:flex;align-items:center;gap:10px;margin-bottom:16px;">
+        <button onclick="weekNav(-1)" style="width:32px;height:32px;border-radius:8px;border:1.5px solid var(--border);background:white;cursor:pointer;font-size:1rem;touch-action:manipulation;">‹</button>
+        <div style="flex:1;text-align:center;font-weight:700;font-size:0.88rem;color:var(--navy)" id="weekLabel">—</div>
+        <button onclick="weekNav(1)" style="width:32px;height:32px;border-radius:8px;border:1.5px solid var(--border);background:white;cursor:pointer;font-size:1rem;touch-action:manipulation;">›</button>
+      </div>
+      <div id="weekViewContent" style="overflow-y:auto;max-height:60vh;"></div>
+      <button class="btn-full secondary" onclick="closeModal('weekViewModal')" style="margin-top:16px;">Close</button>
+    </div>
+  </div>
+</div>
+
+<!-- MONTH VIEW MODAL -->
+<div class="modal-overlay" id="monthViewModal">
+  <div class="modal-sheet" style="max-height:95vh;">
+    <div class="modal-handle"></div>
+    <div class="modal-form">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;">
+        <h2 style="margin:0">Monthly Report</h2>
+        <button onclick="closeModal('monthViewModal')" style="background:none;border:none;font-size:1.2rem;cursor:pointer;color:var(--text-muted);">✕</button>
+      </div>
+      <div style="display:flex;align-items:center;gap:10px;margin-bottom:16px;">
+        <button onclick="monthNav(-1)" style="width:32px;height:32px;border-radius:8px;border:1.5px solid var(--border);background:white;cursor:pointer;font-size:1rem;touch-action:manipulation;">‹</button>
+        <div style="flex:1;text-align:center;font-weight:700;font-size:0.88rem;color:var(--navy)" id="monthLabel">—</div>
+        <button onclick="monthNav(1)" style="width:32px;height:32px;border-radius:8px;border:1.5px solid var(--border);background:white;cursor:pointer;font-size:1rem;touch-action:manipulation;">›</button>
+      </div>
+      <div id="monthViewContent" style="overflow-y:auto;max-height:60vh;"></div>
+      <button class="btn-full secondary" onclick="closeModal('monthViewModal')" style="margin-top:16px;">Close</button>
+    </div>
+  </div>
+</div>
+
+
 <!-- NAV -->
 <div class="nav-overlay" id="navOverlay" onclick="closeNav()"></div>
 <div class="nav-menu" id="navMenu">
@@ -410,7 +599,7 @@ body{font-family:'DM Sans',sans-serif;background:var(--cream);color:var(--text);
 // ══════════════════════════════════════════════
 //  CONFIG
 // ══════════════════════════════════════════════
-const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbyu3gFBJ0oEpnZ4GbhbcRVs8UmnZzr_ZzDezIhR57NmixlyKjGp3TbjweDfaQW_-zBM/exec';
+const SCRIPT_URL = 'YOUR_GOOGLE_APPS_SCRIPT_URL_HERE';
 
 const DIVISIONS = [
   { group:'Pre-Primary', items:['UKG'] },
@@ -504,7 +693,8 @@ function saveDemoState() {
   localStorage.setItem('tm_receipt',  String(demoReceipt));
 }
 
-const isDemo = () => SCRIPT_URL === 'YOUR_GOOGLE_APPS_SCRIPT_URL_HERE';
+const isDemo = () => SCRIPT_URL === 'https://script.google.com/macros/s/AKfycbyu3gFBJ0oEpnZ4GbhbcRVs8UmnZzr_ZzDezIhR57NmixlyKjGp3TbjweDfaQW_-zBM/exec
+';
 
 // ══════════════════════════════════════════════
 //  API
@@ -673,6 +863,16 @@ function closeNav() { document.getElementById('navMenu').classList.remove('open'
 // ══════════════════════════════════════════════
 //  HOME — DIVISIONS
 // ══════════════════════════════════════════════
+// Local count cache — persists across sessions
+let divisionCounts = JSON.parse(localStorage.getItem('tm_counts') || '{}');
+function saveCountCache() { localStorage.setItem('tm_counts', JSON.stringify(divisionCounts)); }
+function updateCount(div, delta) {
+  if (divisionCounts[div] === undefined) divisionCounts[div] = 0;
+  divisionCounts[div] = Math.max(0, divisionCounts[div] + delta);
+  saveCountCache();
+}
+function setCount(div, val) { divisionCounts[div] = val; saveCountCache(); }
+
 function renderDivisions() {
   const container = document.getElementById('divisionList');
   container.innerHTML = '';
@@ -683,8 +883,10 @@ function renderDivisions() {
     const grid = document.createElement('div');
     grid.className = 'division-grid';
     group.items.forEach(div => {
-      // FIX 8: Always read live count from demoStudents
-      const count = isDemo() ? (demoStudents[div]||[]).length : '—';
+      // Read from demo students if demo, otherwise from local count cache
+      const count = isDemo()
+        ? (demoStudents[div]||[]).length
+        : (divisionCounts[div] !== undefined ? divisionCounts[div] : 0);
       const btn = document.createElement('div');
       btn.className = 'division-btn';
       btn.innerHTML = `<div class="div-name">${div}</div><div class="div-count">${count} student${count!==1?'s':''}</div>`;
@@ -708,14 +910,19 @@ async function openDivision(div) {
   document.getElementById('studentScreenTitle').textContent = `Class ${div}`;
   document.getElementById('studentScreenSub').textContent   = 'Select month(s) then students';
   renderMonthStrip();
-  autoSelectCurrentMonth();
+  // No auto selection — teacher must pick month manually
   showLoading(true);
   const [sRes, pRes] = await Promise.all([
     api('getStudents', { division:div }),
     api('getPayments', { division:div }),
   ]);
   showLoading(false);
-  if (sRes.success) state.students = sRes.students;
+  if (sRes.success) {
+    state.students = sRes.students;
+    // Update count cache with actual count from server
+    setCount(div, state.students.length);
+    renderDivisions();
+  }
   if (pRes.success) state.payments = pRes.payments;
   renderStudents();
   updateBar();
@@ -744,7 +951,7 @@ function renderMonthStrip() {
   // If current month is Jun-Dec: year1=this year, year2=next year
   // If current month is Jan-May: year1=last year, year2=this year
   const jsMonth = now.getMonth();
-  const baseYear = (jsMonth >= 5) ? yr : yr - 1; // June=5
+  const baseYear = 2026; // Academic year: June 2026 - May 2027
 
   MONTHS.forEach(m => {
     const displayYear = m.year === 1 ? baseYear : baseYear + 1;
@@ -774,13 +981,16 @@ function renderStudents() {
   container.innerHTML = '';
   filtered.forEach(s => {
     const selMonths = [...state.selectedMonths];
-    const allPaid  = selMonths.length>0 && selMonths.every(m => state.payments[s.id]?.[m]);
-    const somePaid = selMonths.some(m => state.payments[s.id]?.[m]);
+    const monthsSelected = selMonths.length > 0;
+    // Only show paid status when months are selected
+    const allPaid  = monthsSelected && selMonths.every(m => state.payments[s.id]?.[m]);
+    const somePaid = monthsSelected && selMonths.some(m => state.payments[s.id]?.[m]);
     const selected = state.selectedStudents.has(s.id);
     const card = document.createElement('div');
+    // Only block card if months selected AND all paid
     card.className = 'student-card'+(allPaid?' already-paid':(selected?' selected':''));
     let badge = '';
-    if (allPaid)      badge = '<span class="paid-badge">All Paid</span>';
+    if (allPaid)       badge = '<span class="paid-badge">All Paid</span>';
     else if (somePaid) badge = '<span class="paid-badge" style="background:var(--gold);color:var(--navy)">Partial</span>';
     const waLine = s.whatsapp ? `<div class="s-wa">📱 ${s.whatsapp}</div>` : '';
     card.innerHTML = `
@@ -790,7 +1000,14 @@ function renderStudents() {
         <div class="s-id">${s.id}</div>
         ${waLine}
       </div>${badge}`;
-    if (!allPaid) card.onclick = () => toggleStudent(s.id);
+    // Allow tap if: no months selected (just viewing) OR months selected but not all paid
+    if (!allPaid) card.onclick = () => {
+      if (!monthsSelected) {
+        showToast('Select a month first to record payment','');
+        return;
+      }
+      toggleStudent(s.id);
+    };
     container.appendChild(card);
   });
 }
@@ -802,6 +1019,10 @@ function toggleStudent(id) {
 }
 function filterStudents() { renderStudents(); }
 function selectAll() {
+  if (state.selectedMonths.size === 0) {
+    showToast('Select a month first','');
+    return;
+  }
   state.students.forEach(s => {
     const allPaid = [...state.selectedMonths].every(m => state.payments[s.id]?.[m]);
     if (!allPaid) state.selectedStudents.add(s.id);
@@ -850,9 +1071,10 @@ async function addStudent() {
   if (res.success) {
     state.students.push({ id:res.studentId, name, guardian:guardian||'—', whatsapp });
     state.payments[res.studentId] = {};
+    updateCount(state.division, 1); // update count cache
     closeModal('addStudentModal');
     renderStudents();
-    renderDivisions(); // FIX 8: refresh count on home screen
+    renderDivisions();
     showToast(`✅ ${name} added (${res.studentId})`, 'success');
   } else {
     showToast(res.error || 'Failed to add student','error');
@@ -922,8 +1144,9 @@ async function removeStudent(id, name) {
     state.students = state.students.filter(s=>s.id!==id);
     delete state.payments[id];
     state.selectedStudents.delete(id);
+    updateCount(state.division, -1); // update count cache
     renderManageList(); renderStudents(); updateBar();
-    renderDivisions(); // FIX 8
+    renderDivisions();
     showToast(`Removed ${name}`,'');
   } else {
     showToast(res.error||'Error removing student','error');
@@ -975,7 +1198,7 @@ async function processNextStudent() {
 function showReceipt(student, months, res) {
   const now = new Date();
   const jsMonth = now.getMonth();
-  const baseYear = (jsMonth >= 5) ? now.getFullYear() : now.getFullYear() - 1;
+  const baseYear = 2026; // Academic year: June 2026 - May 2027
   const monthLines = months.map(m => {
     const mObj = MONTHS.find(x=>x.key===m);
     const yr = mObj.year===1 ? baseYear : baseYear+1;
@@ -1098,6 +1321,474 @@ function showToast(msg, type='') {
   clearTimeout(toastTimer);
   toastTimer = setTimeout(()=>t.classList.remove('show'),3200);
 }
+
+// ══════════════════════════════════════════════════════
+//  ATTENDANCE MODULE
+// ══════════════════════════════════════════════════════
+
+// Attendance state
+let attState = {
+  date: new Date(),          // currently selected date
+  division: null,
+  students: [],
+  marks: {},                 // { studentId: 'P'|'A' }
+  cancelledInfo: null,       // { reason, by } if class cancelled
+  weekOffset: 0,             // weeks from current
+  monthOffset: 0,            // months from current
+  viewDivision: null,        // division for week/month view
+};
+
+// Demo attendance storage
+let demoAttendance  = JSON.parse(localStorage.getItem('tm_attendance')  || '{}');
+let demoCancelled   = JSON.parse(localStorage.getItem('tm_cancelled')   || '{}');
+function saveAttDemo() {
+  localStorage.setItem('tm_attendance', JSON.stringify(demoAttendance));
+  localStorage.setItem('tm_cancelled',  JSON.stringify(demoCancelled));
+}
+
+// Date helpers
+function fmtDate(d) {
+  return d.toLocaleDateString('en-IN',{day:'2-digit',month:'short',year:'numeric'});
+}
+function fmtDateKey(d) {
+  // YYYY-MM-DD key
+  return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');
+}
+function fmtDay(d) {
+  return d.toLocaleDateString('en-IN',{weekday:'long'});
+}
+function isToday(d) {
+  const t = new Date();
+  return d.getDate()===t.getDate() && d.getMonth()===t.getMonth() && d.getFullYear()===t.getFullYear();
+}
+function isSunday(d) { return d.getDay() === 0; }
+function isFuture(d) {
+  const t = new Date(); t.setHours(0,0,0,0);
+  const dd = new Date(d); dd.setHours(0,0,0,0);
+  return dd > t;
+}
+function isMonthLocked(d) {
+  // Month is locked for teachers if the month has ended
+  const now = new Date();
+  const endOfMonth = new Date(d.getFullYear(), d.getMonth()+1, 0);
+  return now > endOfMonth && !['Principal','Management'].includes(state.user?.role);
+}
+
+// ── Module navigation ─────────────────────────────────
+function openFeeModule() {
+  // Show fee division list under home screen
+  document.getElementById('homeWelcomeSub').textContent = 'Select a division to record fees';
+  const container = document.getElementById('divisionList');
+  container.style.display = '';
+  renderDivisions();
+  // Hide attendance home if showing
+  document.querySelectorAll('.module-tab').forEach(t=>t.classList.remove('active-tab'));
+  document.querySelectorAll('.module-tab')[0].classList.add('active-tab');
+}
+
+function openAttModule() {
+  document.querySelectorAll('.module-tab').forEach(t=>t.classList.remove('active-tab'));
+  document.querySelectorAll('.module-tab')[1].classList.add('active-tab');
+  attState.date = new Date();
+  showScreen('attHomeScreen');
+  renderAttHome();
+}
+
+function goMainHome() {
+  showScreen('homeScreen');
+}
+
+function goAttHome() {
+  showScreen('attHomeScreen');
+  renderAttHome();
+}
+
+// ── Render attendance home ────────────────────────────
+function renderAttHome() {
+  const d = attState.date;
+  document.getElementById('attSelectedDate').textContent = fmtDate(d);
+  document.getElementById('attSelectedDay').textContent  = fmtDay(d) + (isToday(d) ? ' — Today' : '');
+  document.getElementById('attDateDisplay').textContent  = fmtDate(d);
+  document.getElementById('attWelcomeName').textContent  = `Attendance — ${state.user?.name.split(' ')[0]}`;
+  document.getElementById('attWelcomeSub').textContent   = isToday(d) ? "Today's attendance" : fmtDate(d);
+  // Disable next button if date is today or future
+  document.getElementById('attNextBtn').disabled = !isFuture(new Date(d.getTime()+86400000)) ? false : true;
+  document.getElementById('attNextBtn').style.opacity = isFuture(new Date(d.getTime()+86400000)) ? '0.3' : '1';
+  renderAttDivisions();
+}
+
+function attChangeDate(delta) {
+  const nd = new Date(attState.date);
+  nd.setDate(nd.getDate() + delta);
+  if (isFuture(nd)) return; // Can't go to future
+  attState.date = nd;
+  renderAttHome();
+}
+
+function attGoToday() {
+  attState.date = new Date();
+  renderAttHome();
+}
+
+function renderAttDivisions() {
+  const container = document.getElementById('attDivisionList');
+  container.innerHTML = '';
+  const dateKey = fmtDateKey(attState.date);
+
+  DIVISIONS.forEach(group => {
+    const grpDiv = document.createElement('div');
+    grpDiv.className = 'class-group';
+    grpDiv.innerHTML = `<div class="class-group-title">${group.group}</div>`;
+    const grid = document.createElement('div');
+    grid.className = 'division-grid';
+    group.items.forEach(div => {
+      const cancelled = demoCancelled[`${dateKey}__${div}`];
+      const attKey = `${dateKey}__${div}`;
+      const marked  = demoAttendance[attKey];
+      const btn = document.createElement('div');
+      btn.className = 'division-btn';
+      let statusLine = '';
+      if (cancelled) {
+        statusLine = `<div style="font-size:0.62rem;color:var(--red);font-weight:700;margin-top:2px">🚫 Cancelled</div>`;
+      } else if (marked) {
+        const pCount = Object.values(marked).filter(v=>v==='P').length;
+        const aCount = Object.values(marked).filter(v=>v==='A').length;
+        statusLine = `<div style="font-size:0.62rem;color:var(--green);font-weight:700;margin-top:2px">✅ ${pCount}P ${aCount}A</div>`;
+      } else if (isSunday(attState.date)) {
+        statusLine = `<div style="font-size:0.62rem;color:var(--text-muted);font-weight:600;margin-top:2px">Sunday</div>`;
+      }
+      btn.innerHTML = `<div class="div-name">${div}</div><div class="div-count">${divisionCounts[div]||0} students</div>${statusLine}`;
+      btn.onclick = () => isSunday(attState.date) ? showToast('Sunday — no classes','') : openAttMark(div);
+      grid.appendChild(btn);
+    });
+    grpDiv.appendChild(grid);
+    container.appendChild(grpDiv);
+  });
+}
+
+// ── Mark attendance ───────────────────────────────────
+async function openAttMark(div) {
+  attState.division = div;
+  attState.marks = {};
+  attState.cancelledInfo = null;
+  showScreen('attMarkScreen');
+  document.getElementById('attMarkTitle').textContent = `Class ${div}`;
+  document.getElementById('attMarkSub').textContent   = fmtDate(attState.date) + (isToday(attState.date)?' — Today':'');
+
+  const locked = isMonthLocked(attState.date);
+
+  // Load students
+  showLoading(true);
+  const sRes = await api('getStudents', { division: div });
+  showLoading(false);
+  if (sRes.success) attState.students = sRes.students;
+
+  // Load existing attendance for this date+division
+  const dateKey = fmtDateKey(attState.date);
+  const attKey  = `${dateKey}__${div}`;
+  const cancelled = demoCancelled[attKey];
+  const existing  = demoAttendance[attKey];
+
+  if (existing) attState.marks = { ...existing };
+
+  // Show cancelled banner
+  const banner = document.getElementById('attCancelledBanner');
+  const quickActs = document.getElementById('attQuickActions');
+  if (cancelled) {
+    attState.cancelledInfo = cancelled;
+    banner.style.display = 'block';
+    quickActs.style.display = 'none';
+    document.getElementById('attCancelledReason').textContent = cancelled.reason;
+    document.getElementById('attCancelledBy').textContent = `Marked by ${cancelled.by} · ${cancelled.time}`;
+    document.getElementById('attUndoBtn').style.display = locked ? 'none' : 'inline-block';
+  } else {
+    banner.style.display = 'none';
+    quickActs.style.display = 'flex';
+  }
+
+  renderAttStudents(locked);
+  updateAttBar();
+}
+
+function renderAttStudents(locked) {
+  const container = document.getElementById('attStudentCards');
+  if (attState.students.length === 0) {
+    container.innerHTML = `<div class="empty-msg"><div class="empty-icon">👥</div><p>No students in this division yet.</p></div>`;
+    return;
+  }
+  const cancelled = !!attState.cancelledInfo;
+  container.innerHTML = '';
+  attState.students.forEach(s => {
+    const mark = attState.marks[s.id] || '';
+    const card = document.createElement('div');
+    card.className = `att-student-card${mark==='P'?' present':mark==='A'?' absent':''}`;
+    const disabledAttr = (locked || cancelled) ? 'disabled style="opacity:0.5;cursor:default"' : '';
+    card.innerHTML = `
+      <div style="flex:1;min-width:0;">
+        <div style="font-size:0.9rem;font-weight:700">${s.name}</div>
+        <div style="font-size:0.68rem;color:var(--text-muted)">${s.id}</div>
+      </div>
+      <div class="att-toggle">
+        <button class="att-toggle-btn${mark==='P'?' active-present':''}" onclick="setMark('${s.id}','P')" ${disabledAttr}>✅ P</button>
+        <button class="att-toggle-btn${mark==='A'?' active-absent':''}" onclick="setMark('${s.id}','A')" ${disabledAttr}>❌ A</button>
+      </div>`;
+    container.appendChild(card);
+  });
+
+  if (locked) {
+    const notice = document.createElement('div');
+    notice.style.cssText = 'text-align:center;padding:14px;font-size:0.8rem;color:var(--text-muted);font-weight:600;background:var(--cream-dark);border-radius:10px;margin-top:8px;';
+    notice.textContent = '🔒 Month ended — attendance locked for teachers';
+    container.appendChild(notice);
+  }
+}
+
+function setMark(studentId, mark) {
+  if (isMonthLocked(attState.date) || attState.cancelledInfo) return;
+  // Toggle off if same mark tapped
+  attState.marks[studentId] = attState.marks[studentId] === mark ? '' : mark;
+  renderAttStudents(false);
+  updateAttBar();
+}
+
+function markAllPresent() {
+  attState.students.forEach(s => { attState.marks[s.id] = 'P'; });
+  renderAttStudents(false); updateAttBar();
+}
+function markAllAbsent() {
+  attState.students.forEach(s => { attState.marks[s.id] = 'A'; });
+  renderAttStudents(false); updateAttBar();
+}
+function clearAttMarks() {
+  attState.marks = {};
+  renderAttStudents(false); updateAttBar();
+}
+
+function updateAttBar() {
+  const pCount = Object.values(attState.marks).filter(v=>v==='P').length;
+  const aCount = Object.values(attState.marks).filter(v=>v==='A').length;
+  const total  = attState.students.length;
+  const unmarked = total - pCount - aCount;
+  document.getElementById('attBarCount').textContent = `${pCount} Present · ${aCount} Absent`;
+  document.getElementById('attBarSub').textContent   = unmarked > 0 ? `⚠ ${unmarked} not marked` : '✅ All marked';
+  document.getElementById('attSaveBtn').disabled = isMonthLocked(attState.date) || !!attState.cancelledInfo;
+}
+
+async function saveAttendance() {
+  if (isMonthLocked(attState.date)) { showToast('Month locked — cannot edit','error'); return; }
+  const dateKey = fmtDateKey(attState.date);
+  const attKey  = `${dateKey}__${attState.division}`;
+  // Save to demo storage
+  demoAttendance[attKey] = { ...attState.marks };
+  // Also save audit: teacher + time
+  const now = new Date();
+  demoAttendance[attKey + '__meta'] = {
+    by: state.user.name,
+    time: now.toLocaleTimeString('en-IN',{hour:'2-digit',minute:'2-digit',hour12:true}),
+    date: fmtDate(now),
+  };
+  saveAttDemo();
+  showToast('✅ Attendance saved','success');
+  setTimeout(()=>goAttHome(),800);
+}
+
+// ── Cancel Class ─────────────────────────────────────
+let selectedCancelReason = '';
+function openCancelClass() {
+  if (isMonthLocked(attState.date)) { showToast('Month locked','error'); return; }
+  selectedCancelReason = '';
+  document.querySelectorAll('.cancel-reason-btn').forEach(b=>b.classList.remove('selected'));
+  document.getElementById('otherReasonWrap').style.display = 'none';
+  document.getElementById('otherReasonInput').value = '';
+  openModal('cancelClassModal');
+}
+function selectCancelReason(reason) {
+  selectedCancelReason = reason;
+  document.querySelectorAll('.cancel-reason-btn').forEach(b=>b.classList.remove('selected'));
+  event.target.classList.add('selected');
+  if (reason === 'Other Reason') {
+    document.getElementById('otherReasonWrap').style.display = 'block';
+    setTimeout(()=>document.getElementById('otherReasonInput').focus(),200);
+  } else {
+    document.getElementById('otherReasonWrap').style.display = 'none';
+    // Auto confirm after short delay
+    setTimeout(()=>confirmCancelClass(),400);
+  }
+}
+function confirmCancelClass() {
+  let reason = selectedCancelReason;
+  if (reason === 'Other Reason') {
+    reason = document.getElementById('otherReasonInput').value.trim();
+    if (!reason) { showToast('Please enter a reason','error'); return; }
+  }
+  if (!reason) return;
+  const dateKey = fmtDateKey(attState.date);
+  const attKey  = `${dateKey}__${attState.division}`;
+  const now = new Date();
+  const info = {
+    reason,
+    by: state.user.name,
+    time: now.toLocaleTimeString('en-IN',{hour:'2-digit',minute:'2-digit',hour12:true}),
+  };
+  demoCancelled[attKey] = info;
+  saveAttDemo();
+  attState.cancelledInfo = info;
+  closeModal('cancelClassModal');
+  // Refresh screen
+  openAttMark(attState.division);
+  showToast(`🚫 Class marked as cancelled`,'');
+}
+function undoCancelClass() {
+  if (isMonthLocked(attState.date)) return;
+  const dateKey = fmtDateKey(attState.date);
+  const attKey  = `${dateKey}__${attState.division}`;
+  delete demoCancelled[attKey];
+  saveAttDemo();
+  attState.cancelledInfo = null;
+  openAttMark(attState.division);
+  showToast('Cancellation removed','');
+}
+
+// ── Week View ─────────────────────────────────────────
+function openWeekView() {
+  attState.weekOffset = 0;
+  renderWeekView();
+  openModal('weekViewModal');
+}
+function weekNav(delta) {
+  attState.weekOffset += delta;
+  renderWeekView();
+}
+function renderWeekView() {
+  // Get Mon-Sat of current week + offset
+  const now = new Date();
+  now.setDate(now.getDate() + attState.weekOffset * 7);
+  const day = now.getDay(); // 0=Sun
+  const monday = new Date(now);
+  monday.setDate(now.getDate() - (day === 0 ? 6 : day - 1));
+
+  const days = [];
+  for (let i = 0; i < 6; i++) {
+    const d = new Date(monday);
+    d.setDate(monday.getDate() + i);
+    days.push(d);
+  }
+
+  document.getElementById('weekLabel').textContent =
+    `${fmtDate(days[0])} — ${fmtDate(days[5])}`;
+
+  const div = attState.division || DIVISIONS[0].items[0];
+  const students = isDemo() ? (demoStudents[div]||[]) : [];
+
+  let html = '';
+  days.forEach(d => {
+    const dateKey = fmtDateKey(d);
+    const attKey  = `${dateKey}__${div}`;
+    const cancelled = demoCancelled[attKey];
+    const marks   = demoAttendance[attKey] || {};
+    const pCount  = Object.values(marks).filter(v=>v==='P').length;
+    const aCount  = Object.values(marks).filter(v=>v==='A').length;
+    const future  = isFuture(d);
+    const sunday  = d.getDay() === 0;
+    html += `<div class="week-day-row">
+      <div class="week-day-header">
+        <span>${d.toLocaleDateString('en-IN',{weekday:'short',day:'2-digit',month:'short'})}</span>
+        ${isToday(d)?'<span style="background:var(--navy);color:white;font-size:0.65rem;padding:2px 8px;border-radius:20px;">Today</span>':''}
+      </div>
+      <div class="week-day-stats">`;
+    if (sunday)    html += `<span class="stat-chip stat-holiday">Sunday</span>`;
+    else if (future)    html += `<span class="stat-chip" style="background:var(--cream-dark);color:var(--text-muted)">Upcoming</span>`;
+    else if (cancelled) html += `<span class="stat-chip stat-holiday">🚫 ${cancelled.reason}</span>`;
+    else if (pCount+aCount===0) html += `<span class="stat-chip" style="background:var(--cream-dark);color:var(--text-muted)">Not marked</span>`;
+    else {
+      html += `<span class="stat-chip stat-present">✅ ${pCount} Present</span>`;
+      if (aCount>0) html += `<span class="stat-chip stat-absent">❌ ${aCount} Absent</span>`;
+    }
+    html += `</div></div>`;
+  });
+
+  document.getElementById('weekViewContent').innerHTML =
+    `<div style="font-size:0.75rem;font-weight:800;text-transform:uppercase;color:var(--text-muted);margin-bottom:10px;">Division: ${div}</div>` + html;
+}
+
+// ── Month View ─────────────────────────────────────────
+function openMonthView() {
+  attState.monthOffset = 0;
+  attState.viewDivision = attState.division || DIVISIONS[0].items[0];
+  renderMonthView();
+  openModal('monthViewModal');
+}
+function monthNav(delta) {
+  attState.monthOffset += delta;
+  renderMonthView();
+}
+function renderMonthView() {
+  const now = new Date();
+  const target = new Date(now.getFullYear(), now.getMonth() + attState.monthOffset, 1);
+  const year   = target.getFullYear();
+  const month  = target.getMonth();
+  const monthName = target.toLocaleDateString('en-IN',{month:'long',year:'numeric'});
+  document.getElementById('monthLabel').textContent = monthName + ' — ' + (attState.viewDivision||'');
+
+  // Get all working days (Mon-Sat) in the month
+  const workingDays = [];
+  const daysInMonth = new Date(year, month+1, 0).getDate();
+  for (let d = 1; d <= daysInMonth; d++) {
+    const date = new Date(year, month, d);
+    if (date.getDay() !== 0) workingDays.push(date); // exclude Sundays
+  }
+
+  const div = attState.viewDivision;
+  const students = isDemo() ? (demoStudents[div]||[]) : attState.students;
+
+  if (students.length === 0) {
+    document.getElementById('monthViewContent').innerHTML = '<div class="empty-msg"><p>No students in this division.</p></div>';
+    return;
+  }
+
+  // Header row with day numbers
+  let html = `<div style="overflow-x:auto;">
+    <table style="width:100%;border-collapse:collapse;font-size:0.72rem;">
+    <thead><tr>
+      <th style="text-align:left;padding:6px 8px;font-weight:800;color:var(--navy);min-width:120px;position:sticky;left:0;background:white;">Student</th>`;
+
+  workingDays.forEach(d => {
+    const cancelled = demoCancelled[`${fmtDateKey(d)}__${div}`];
+    const bg = cancelled ? '#FEF3DC' : 'white';
+    html += `<th style="padding:4px;text-align:center;background:${bg};min-width:28px;">
+      <div>${d.getDate()}</div>
+      <div style="font-size:0.55rem;color:var(--text-muted)">${d.toLocaleDateString('en-IN',{weekday:'narrow'})}</div>
+    </th>`;
+  });
+  html += `<th style="padding:6px 8px;text-align:center;color:var(--green);font-weight:800;">P</th>
+           <th style="padding:6px 8px;text-align:center;color:var(--red);font-weight:800;">A</th>
+           <th style="padding:6px 8px;text-align:center;color:var(--text-muted);font-weight:800;">%</th>
+    </tr></thead><tbody>`;
+
+  students.forEach((s,idx) => {
+    let pCount=0, aCount=0;
+    html += `<tr style="background:${idx%2===0?'white':'var(--cream)'}">
+      <td style="padding:6px 8px;font-weight:700;position:sticky;left:0;background:${idx%2===0?'white':'var(--cream)'};">${s.name}</td>`;
+    workingDays.forEach(d => {
+      const dateKey = fmtDateKey(d);
+      const cancelled = demoCancelled[`${dateKey}__${div}`];
+      const mark = (demoAttendance[`${dateKey}__${div}`]||{})[s.id] || '';
+      if (cancelled)   { html += `<td style="text-align:center;background:var(--gold-pale);">H</td>`; }
+      else if (mark==='P') { pCount++; html += `<td style="text-align:center;background:var(--green-light);color:var(--green);font-weight:700;">P</td>`; }
+      else if (mark==='A') { aCount++; html += `<td style="text-align:center;background:var(--red-light);color:var(--red);font-weight:700;">A</td>`; }
+      else if (isFuture(d)) { html += `<td style="text-align:center;color:var(--border);">—</td>`; }
+      else             { html += `<td style="text-align:center;color:var(--text-muted);">?</td>`; }
+    });
+    const pct = pCount+aCount>0 ? Math.round(pCount/(pCount+aCount)*100) : '—';
+    const pctColor = typeof pct==='number' ? (pct>=75?'var(--green)':pct>=50?'var(--gold)':'var(--red)') : 'var(--text-muted)';
+    html += `<td style="text-align:center;font-weight:800;color:var(--green);">${pCount}</td>
+             <td style="text-align:center;font-weight:800;color:var(--red);">${aCount}</td>
+             <td style="text-align:center;font-weight:800;color:${pctColor};">${typeof pct==='number'?pct+'%':pct}</td></tr>`;
+  });
+  html += '</tbody></table></div>';
+  document.getElementById('monthViewContent').innerHTML = html;
+}
+
 </script>
 </body>
 </html>
