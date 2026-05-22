@@ -317,6 +317,8 @@ body{font-family:'DM Sans',Arial,sans-serif;background:var(--cream);color:var(--
         <div class="mt-sub">Mark daily attendance</div>
       </div>
     </div>
+    <!-- Division list — shown when Fee module selected -->
+    <div id="divisionList" style="display:none"></div>
   </div>
 </div>
 
@@ -877,6 +879,7 @@ function setCount(div, val) { divisionCounts[div] = val; saveCountCache(); }
 
 function renderDivisions() {
   const container = document.getElementById('divisionList');
+  if (!container) return;
   container.innerHTML = '';
   DIVISIONS.forEach(group => {
     const grpDiv = document.createElement('div');
@@ -1378,17 +1381,20 @@ function isMonthLocked(d) {
 
 // ── Module navigation ─────────────────────────────────
 function openFeeModule() {
-  // Show fee division list under home screen
   document.getElementById('homeWelcomeSub').textContent = 'Select a division to record fees';
   const container = document.getElementById('divisionList');
-  container.style.display = '';
-  renderDivisions();
-  // Hide attendance home if showing
+  if (container) {
+    container.style.display = 'block';
+    renderDivisions();
+  }
   document.querySelectorAll('.module-tab').forEach(t=>t.classList.remove('active-tab'));
   document.querySelectorAll('.module-tab')[0].classList.add('active-tab');
 }
 
 function openAttModule() {
+  // Hide fee division list
+  const dl = document.getElementById('divisionList');
+  if (dl) dl.style.display = 'none';
   document.querySelectorAll('.module-tab').forEach(t=>t.classList.remove('active-tab'));
   document.querySelectorAll('.module-tab')[1].classList.add('active-tab');
   attState.date = new Date();
