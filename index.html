@@ -9,7 +9,10 @@
 <meta name="apple-mobile-web-app-title" content="Thaqwa Madrasa">
 <meta name="theme-color" content="#1A3C5E">
 <title>Thaqwa Madrasa</title>
-<link href="https://fonts.googleapis.com/css2?family=Amiri:wght@400;700&family=DM+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Amiri:wght@400;700&family=DM+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet" media="print" onload="this.media='all'">
+<noscript><link href="https://fonts.googleapis.com/css2?family=Amiri:wght@400;700&family=DM+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet"></noscript>
 <style>
 :root {
   --navy:#1A3C5E;--navy-mid:#2E5F8A;--navy-light:#3D7BB5;
@@ -24,7 +27,7 @@
 }
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
 html{height:100%;}
-body{font-family:'DM Sans',sans-serif;background:var(--cream);color:var(--text);height:100%;overflow-x:hidden;-webkit-tap-highlight-color:transparent;-webkit-font-smoothing:antialiased;}
+body{font-family:'DM Sans',Arial,sans-serif;background:var(--cream);color:var(--text);height:100%;overflow-x:hidden;-webkit-tap-highlight-color:transparent;-webkit-font-smoothing:antialiased;}
 .screen{display:none;min-height:100vh;flex-direction:column;animation:fadeIn 0.25s ease;}
 .screen.active{display:flex;}
 @keyframes fadeIn{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
@@ -254,7 +257,7 @@ body{font-family:'DM Sans',sans-serif;background:var(--cream);color:var(--text);
   <div class="login-card">
     <div class="login-emblem">🕌</div>
     <div class="login-title">Thaqwa Madrasa</div>
-    <div class="login-subtitle">Fort Kochi · Fee Collection System</div>
+    <div class="login-subtitle">Fort Kochi System</div>
     <div class="login-divider"></div>
     <div class="pin-label">Enter Your PIN</div>
     <div class="pin-dots" id="pinDots">
@@ -285,7 +288,7 @@ body{font-family:'DM Sans',sans-serif;background:var(--cream);color:var(--text);
   <div class="app-header">
     <div class="header-info">
       <div class="header-title">🕌 Thaqwa Madrasa</div>
-      <div class="header-sub">Fort Kochi · Fee Collection</div>
+      <div class="header-sub">Fort Kochi</div>
     </div>
     <div class="header-user">
       <div class="header-avatar" id="headerAvatar">?</div>
@@ -599,7 +602,7 @@ body{font-family:'DM Sans',sans-serif;background:var(--cream);color:var(--text);
 // ══════════════════════════════════════════════
 //  CONFIG
 // ══════════════════════════════════════════════
-const SCRIPT_URL = 'YOUR_GOOGLE_APPS_SCRIPT_URL_HERE';
+const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbyu3gFBJ0oEpnZ4GbhbcRVs8UmnZzr_ZzDezIhR57NmixlyKjGp3TbjweDfaQW_-zBM/exec';
 
 const DIVISIONS = [
   { group:'Pre-Primary', items:['UKG'] },
@@ -693,8 +696,7 @@ function saveDemoState() {
   localStorage.setItem('tm_receipt',  String(demoReceipt));
 }
 
-const isDemo = () => SCRIPT_URL === 'https://script.google.com/macros/s/AKfycbyu3gFBJ0oEpnZ4GbhbcRVs8UmnZzr_ZzDezIhR57NmixlyKjGp3TbjweDfaQW_-zBM/exec
-';
+const isDemo = () => SCRIPT_URL === 'YOUR_GOOGLE_APPS_SCRIPT_URL_HERE';
 
 // ══════════════════════════════════════════════
 //  API
