@@ -257,7 +257,8 @@ body{font-family:'DM Sans',Arial,sans-serif;background:var(--cream);color:var(--
   <div class="login-card">
     <div class="login-emblem">🕌</div>
     <div class="login-title">Thaqwa Madrasa</div>
-    <div class="login-subtitle">Fort Kochi System</div>
+    <div class="login-subtitle">Fort Kochi</div>
+    <div style="font-size:1.05rem;font-weight:700;color:rgba(255,255,255,0.85);margin-top:10px;letter-spacing:0.08em;text-transform:uppercase;">Login</div>
     <div class="login-divider"></div>
     <div class="pin-label">Enter Your PIN</div>
     <div class="pin-dots" id="pinDots">
@@ -330,7 +331,6 @@ body{font-family:'DM Sans',Arial,sans-serif;background:var(--cream);color:var(--
       <div class="header-title" id="studentScreenTitle">Class</div>
       <div class="header-sub" id="studentScreenSub">Select students & months</div>
     </div>
-    <button class="btn-xs" style="font-size:0.75rem" onclick="openAddStudent()">+ Add</button>
   </div>
   <div class="page-body">
     <div class="month-strip-wrap">
@@ -344,7 +344,6 @@ body{font-family:'DM Sans',Arial,sans-serif;background:var(--cream);color:var(--
     <div class="student-actions">
       <button class="btn-xs primary" onclick="selectAll()">Select All</button>
       <button class="btn-xs" onclick="clearAll()">Clear</button>
-      <button class="btn-xs" style="margin-left:auto" onclick="openManageStudents()">⚙ Manage</button>
     </div>
     <div class="student-cards" id="studentCards"></div>
   </div>
@@ -450,6 +449,7 @@ body{font-family:'DM Sans',Arial,sans-serif;background:var(--cream);color:var(--
       <div class="header-title">📅 Attendance</div>
       <div class="header-sub" id="attDateDisplay">Today</div>
     </div>
+    <button class="btn-xs" style="font-size:0.72rem;color:white;background:rgba(255,255,255,0.15);border-color:rgba(255,255,255,0.3)" onclick="openAttStudentMgmt()">👥 Students</button>
     <button class="header-back" style="margin-left:8px" onclick="openNav()">☰</button>
   </div>
   <div class="home-body">
@@ -583,6 +583,123 @@ body{font-family:'DM Sans',Arial,sans-serif;background:var(--cream);color:var(--
   </div>
 </div>
 
+
+
+<!-- STUDENT MANAGEMENT MODAL (Attendance) -->
+<div class="modal-overlay" id="attStudentMgmtModal">
+  <div class="modal-sheet" style="max-height:95vh;">
+    <div class="modal-handle"></div>
+    <div class="modal-form">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;">
+        <h2 style="margin:0">Student Management</h2>
+        <button onclick="closeModal('attStudentMgmtModal')" style="background:none;border:none;font-size:1.2rem;cursor:pointer;color:var(--text-muted);">✕</button>
+      </div>
+      <!-- Division picker -->
+      <div class="form-group">
+        <label>Select Division</label>
+        <select id="mgmtDivSelect" onchange="loadMgmtStudents()" style="width:100%;padding:10px 14px;border-radius:8px;border:1.5px solid var(--border);font-family:'DM Sans',sans-serif;font-size:0.9rem;outline:none;background:white;">
+          <option value="">— Choose Division —</option>
+        </select>
+      </div>
+      <!-- Add student form -->
+      <div id="addStudentForm" style="background:var(--cream);border-radius:10px;padding:14px;margin-bottom:14px;">
+        <div style="font-size:0.75rem;font-weight:800;text-transform:uppercase;letter-spacing:0.07em;color:var(--text-muted);margin-bottom:10px;">Add New Student</div>
+        <div class="form-group" style="margin-bottom:10px;">
+          <input type="text" id="mgmtNewName" placeholder="Student Name *" autocomplete="off" style="width:100%;padding:9px 12px;border-radius:7px;border:1.5px solid var(--border);font-family:'DM Sans',sans-serif;font-size:0.88rem;outline:none;">
+        </div>
+        <div class="form-group" style="margin-bottom:10px;">
+          <input type="text" id="mgmtNewGuardian" placeholder="Guardian Name" autocomplete="off" style="width:100%;padding:9px 12px;border-radius:7px;border:1.5px solid var(--border);font-family:'DM Sans',sans-serif;font-size:0.88rem;outline:none;">
+        </div>
+        <div class="form-group" style="margin-bottom:10px;">
+          <input type="tel" id="mgmtNewWhatsapp" placeholder="WhatsApp Number (10 digits)" maxlength="10" autocomplete="off" style="width:100%;padding:9px 12px;border-radius:7px;border:1.5px solid var(--border);font-family:'DM Sans',sans-serif;font-size:0.88rem;outline:none;">
+        </div>
+        <button onclick="mgmtAddStudent()" style="width:100%;padding:10px;border-radius:8px;background:var(--navy);color:white;border:none;font-family:'DM Sans',sans-serif;font-size:0.85rem;font-weight:700;cursor:pointer;">➕ Add Student</button>
+      </div>
+      <!-- Student list -->
+      <div id="mgmtStudentList" style="max-height:40vh;overflow-y:auto;"></div>
+      <button class="btn-full secondary" onclick="closeModal('attStudentMgmtModal')" style="margin-top:12px;">Close</button>
+    </div>
+  </div>
+</div>
+
+<!-- EDIT STUDENT MODAL (from Attendance) -->
+<div class="modal-overlay" id="attEditStudentModal">
+  <div class="modal-sheet">
+    <div class="modal-handle"></div>
+    <div class="modal-form">
+      <h2>Edit Student</h2>
+      <div class="edit-student-info" id="attEditStudentInfo" style="background:var(--cream);border-radius:8px;padding:10px 14px;margin-bottom:14px;font-size:0.85rem;"></div>
+      <div class="form-group"><label>Student Name *</label><input type="text" id="attEditName" autocomplete="off"></div>
+      <div class="form-group"><label>Guardian Name</label><input type="text" id="attEditGuardian" autocomplete="off"></div>
+      <div class="form-group">
+        <label>WhatsApp Number *</label>
+        <input type="tel" id="attEditWhatsapp" maxlength="10" autocomplete="off">
+        <div class="field-hint">Must be exactly 10 digits</div>
+      </div>
+      <button class="btn-full" onclick="mgmtSaveEdit()">💾 Save Changes</button>
+      <button class="btn-full secondary" onclick="closeModal('attEditStudentModal')">Cancel</button>
+    </div>
+  </div>
+</div>
+
+<!-- ATTENDANCE REPORT MODAL -->
+<div class="modal-overlay" id="attReportModal">
+  <div class="modal-sheet" style="max-height:95vh;">
+    <div class="modal-handle"></div>
+    <div class="modal-form">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;">
+        <h2 style="margin:0">📅 Attendance Report</h2>
+        <button onclick="closeModal('attReportModal')" style="background:none;border:none;font-size:1.2rem;cursor:pointer;color:var(--text-muted);">✕</button>
+      </div>
+      <!-- Controls -->
+      <div style="display:flex;gap:8px;margin-bottom:12px;flex-wrap:wrap;">
+        <select id="attReportType" onchange="renderAttReport()" style="flex:1;padding:9px 10px;border-radius:8px;border:1.5px solid var(--border);font-family:'DM Sans',sans-serif;font-size:0.85rem;outline:none;background:white;">
+          <option value="weekly">Weekly</option>
+          <option value="monthly">Monthly</option>
+          <option value="yearly">Yearly</option>
+        </select>
+        <select id="attReportDiv" onchange="renderAttReport()" style="flex:1;padding:9px 10px;border-radius:8px;border:1.5px solid var(--border);font-family:'DM Sans',sans-serif;font-size:0.85rem;outline:none;background:white;">
+        </select>
+      </div>
+      <div style="display:flex;align-items:center;gap:8px;margin-bottom:14px;">
+        <button onclick="attReportNav(-1)" style="width:32px;height:32px;border-radius:8px;border:1.5px solid var(--border);background:white;cursor:pointer;font-size:1rem;touch-action:manipulation;flex-shrink:0;">‹</button>
+        <div style="flex:1;text-align:center;font-weight:700;font-size:0.85rem;color:var(--navy)" id="attReportPeriodLabel">—</div>
+        <button onclick="attReportNav(1)" style="width:32px;height:32px;border-radius:8px;border:1.5px solid var(--border);background:white;cursor:pointer;font-size:1rem;touch-action:manipulation;flex-shrink:0;">›</button>
+      </div>
+      <div id="attReportContent" style="overflow-x:auto;max-height:55vh;overflow-y:auto;"></div>
+      <button class="btn-full secondary" onclick="closeModal('attReportModal')" style="margin-top:12px;">Close</button>
+    </div>
+  </div>
+</div>
+
+<!-- FEE REPORT MODAL -->
+<div class="modal-overlay" id="feeReportModal">
+  <div class="modal-sheet" style="max-height:95vh;">
+    <div class="modal-handle"></div>
+    <div class="modal-form">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;">
+        <h2 style="margin:0">💰 Fee Collection Report</h2>
+        <button onclick="closeModal('feeReportModal')" style="background:none;border:none;font-size:1.2rem;cursor:pointer;color:var(--text-muted);">✕</button>
+      </div>
+      <div style="display:flex;gap:8px;margin-bottom:14px;">
+        <button onclick="setFeeReportType('daily')"   id="feeRptDay" class="btn-xs primary" style="flex:1;text-align:center;">Daily</button>
+        <button onclick="setFeeReportType('weekly')"  id="feeRptWeek" class="btn-xs" style="flex:1;text-align:center;">Weekly</button>
+        <button onclick="setFeeReportType('monthly')" id="feeRptMonth" class="btn-xs" style="flex:1;text-align:center;">This Month</button>
+      </div>
+      <div style="display:flex;align-items:center;gap:8px;margin-bottom:14px;" id="feeReportNavRow">
+        <button onclick="feeReportNav(-1)" style="width:32px;height:32px;border-radius:8px;border:1.5px solid var(--border);background:white;cursor:pointer;font-size:1rem;touch-action:manipulation;flex-shrink:0;">‹</button>
+        <div style="flex:1;text-align:center;font-weight:700;font-size:0.85rem;color:var(--navy)" id="feeReportPeriodLabel">—</div>
+        <button onclick="feeReportNav(1)" style="width:32px;height:32px;border-radius:8px;border:1.5px solid var(--border);background:white;cursor:pointer;font-size:1rem;touch-action:manipulation;flex-shrink:0;">›</button>
+      </div>
+      <div id="feeReportSummary" style="background:var(--gold-pale);border:1px solid #EDD99A;border-radius:10px;padding:12px 14px;margin-bottom:12px;display:flex;justify-content:space-between;align-items:center;">
+        <span style="font-size:0.82rem;font-weight:700;color:var(--navy)">Total Collected</span>
+        <span style="font-size:1.1rem;font-weight:800;color:var(--gold)" id="feeReportTotal">₹0</span>
+      </div>
+      <div id="feeReportContent" style="max-height:50vh;overflow-y:auto;"></div>
+      <button class="btn-full secondary" onclick="closeModal('feeReportModal')" style="margin-top:12px;">Close</button>
+    </div>
+  </div>
+</div>
 
 <!-- NAV -->
 <div class="nav-overlay" id="navOverlay" onclick="closeNav()"></div>
@@ -1795,6 +1912,441 @@ function renderMonthView() {
   });
   html += '</tbody></table></div>';
   document.getElementById('monthViewContent').innerHTML = html;
+}
+
+
+// ══════════════════════════════════════════════════════
+//  STUDENT MANAGEMENT (Attendance Section)
+// ══════════════════════════════════════════════════════
+let mgmtEditingId = null;
+
+function openAttStudentMgmt() {
+  // Populate division dropdown
+  const sel = document.getElementById('mgmtDivSelect');
+  sel.innerHTML = '<option value="">— Choose Division —</option>';
+  DIVISIONS.forEach(g => g.items.forEach(div => {
+    const opt = document.createElement('option');
+    opt.value = div; opt.textContent = `Class ${div}`;
+    sel.appendChild(opt);
+  }));
+  // Pre-select current division if in att screen
+  if (attState.division) sel.value = attState.division;
+  document.getElementById('mgmtStudentList').innerHTML = '';
+  document.getElementById('mgmtNewName').value = '';
+  document.getElementById('mgmtNewGuardian').value = '';
+  document.getElementById('mgmtNewWhatsapp').value = '';
+  openModal('attStudentMgmtModal');
+  if (attState.division) loadMgmtStudents();
+}
+
+async function loadMgmtStudents() {
+  const div = document.getElementById('mgmtDivSelect').value;
+  if (!div) { document.getElementById('mgmtStudentList').innerHTML = ''; return; }
+  showLoading(true);
+  const res = await api('getStudents', { division: div });
+  showLoading(false);
+  const students = res.success ? res.students : (demoStudents[div]||[]);
+  renderMgmtList(div, students);
+}
+
+function renderMgmtList(div, students) {
+  const list = document.getElementById('mgmtStudentList');
+  if (!students.length) {
+    list.innerHTML = '<div style="text-align:center;padding:20px;color:var(--text-muted);font-size:0.85rem;">No students yet. Add one above.</div>';
+    return;
+  }
+  list.innerHTML = `<div style="font-size:0.72rem;font-weight:800;text-transform:uppercase;color:var(--text-muted);letter-spacing:0.07em;margin-bottom:8px;">${students.length} Students — Class ${div}</div>` +
+    students.map(s => `
+    <div class="manage-row">
+      <div class="manage-row-info">
+        <div class="manage-row-name">${s.name}</div>
+        <div class="manage-row-sub">${s.id}</div>
+        <div class="manage-row-wa">${s.whatsapp ? '📱 '+s.whatsapp : '⚠ No WhatsApp'}</div>
+      </div>
+      <button class="btn-manage btn-edit" onclick="openAttEdit('${s.id}','${div}')">✏</button>
+      <button class="btn-manage btn-remove" onclick="mgmtRemove('${s.id}','${s.name.replace(/'/g,'')}','${div}')">🗑</button>
+    </div>`).join('');
+}
+
+async function mgmtAddStudent() {
+  const div  = document.getElementById('mgmtDivSelect').value;
+  const name = document.getElementById('mgmtNewName').value.trim();
+  const guardian = document.getElementById('mgmtNewGuardian').value.trim();
+  const whatsapp = document.getElementById('mgmtNewWhatsapp').value.trim();
+  if (!div)  { showToast('Select a division first','error'); return; }
+  if (!name) { showToast('Enter student name','error'); return; }
+  if (!/^\d{10}$/.test(whatsapp)) { showToast('WhatsApp must be 10 digits','error'); return; }
+  const res = await api('addStudent', { division:div, name, guardian, whatsapp, addedBy:state.user.name });
+  if (res.success) {
+    if (!demoStudents[div]) demoStudents[div] = [];
+    demoStudents[div].push({ id:res.studentId, name, guardian:guardian||'—', whatsapp });
+    updateCount(div, 1);
+    document.getElementById('mgmtNewName').value = '';
+    document.getElementById('mgmtNewGuardian').value = '';
+    document.getElementById('mgmtNewWhatsapp').value = '';
+    loadMgmtStudents();
+    renderDivisions();
+    renderAttDivisions();
+    showToast(`✅ ${name} added (${res.studentId})`, 'success');
+  } else showToast(res.error||'Failed to add','error');
+}
+
+function openAttEdit(id, div) {
+  const students = demoStudents[div]||[];
+  const s = students.find(s=>s.id===id);
+  if (!s) return;
+  mgmtEditingId = id;
+  document.getElementById('attEditStudentInfo').innerHTML = `<strong>${s.id}</strong> — Class ${div}`;
+  document.getElementById('attEditName').value     = s.name;
+  document.getElementById('attEditGuardian').value = s.guardian !== '—' ? s.guardian : '';
+  document.getElementById('attEditWhatsapp').value = s.whatsapp||'';
+  closeModal('attStudentMgmtModal');
+  openModal('attEditStudentModal');
+}
+
+async function mgmtSaveEdit() {
+  const div  = document.getElementById('mgmtDivSelect').value;
+  const name = document.getElementById('attEditName').value.trim();
+  const guardian = document.getElementById('attEditGuardian').value.trim();
+  const whatsapp = document.getElementById('attEditWhatsapp').value.trim();
+  if (!name) { showToast('Enter student name','error'); return; }
+  if (!/^\d{10}$/.test(whatsapp)) { showToast('WhatsApp must be 10 digits','error'); return; }
+  const res = await api('editStudent', { division:div, studentId:mgmtEditingId, name, guardian, whatsapp });
+  if (res.success) {
+    const idx = (demoStudents[div]||[]).findIndex(s=>s.id===mgmtEditingId);
+    if (idx!==-1) { demoStudents[div][idx].name=name; demoStudents[div][idx].guardian=guardian||'—'; demoStudents[div][idx].whatsapp=whatsapp; }
+    saveDemoState();
+    closeModal('attEditStudentModal');
+    openModal('attStudentMgmtModal');
+    loadMgmtStudents();
+    showToast('✅ Student updated','success');
+  } else showToast(res.error||'Update failed','error');
+}
+
+async function mgmtRemove(id, name, div) {
+  if (!confirm(`Remove "${name}" from Class ${div}?`)) return;
+  const res = await api('removeStudent', { division:div, studentId:id });
+  if (res.success) {
+    demoStudents[div] = (demoStudents[div]||[]).filter(s=>s.id!==id);
+    saveDemoState();
+    updateCount(div, -1);
+    loadMgmtStudents();
+    renderDivisions();
+    renderAttDivisions();
+    showToast(`Removed ${name}`,'');
+  } else showToast(res.error||'Error removing','error');
+}
+
+// ══════════════════════════════════════════════════════
+//  ATTENDANCE REPORT
+// ══════════════════════════════════════════════════════
+let attReportOffset = 0;
+
+function openAttReport() {
+  // Populate division dropdown
+  const sel = document.getElementById('attReportDiv');
+  sel.innerHTML = '<option value="ALL">All Divisions</option>';
+  DIVISIONS.forEach(g => g.items.forEach(div => {
+    const opt = document.createElement('option');
+    opt.value = div; opt.textContent = `Class ${div}`;
+    sel.appendChild(opt);
+  }));
+  attReportOffset = 0;
+  openModal('attReportModal');
+  renderAttReport();
+}
+
+function attReportNav(delta) {
+  attReportOffset += delta;
+  renderAttReport();
+}
+
+function renderAttReport() {
+  const type = document.getElementById('attReportType').value;
+  const div  = document.getElementById('attReportDiv').value;
+  const now  = new Date();
+
+  if (type === 'weekly') {
+    const base = new Date(now);
+    base.setDate(now.getDate() + attReportOffset * 7);
+    const day = base.getDay();
+    const monday = new Date(base);
+    monday.setDate(base.getDate() - (day===0?6:day-1));
+    const saturday = new Date(monday); saturday.setDate(monday.getDate()+5);
+    document.getElementById('attReportPeriodLabel').textContent =
+      `${fmtDate(monday)} — ${fmtDate(saturday)}`;
+    renderAttWeekReport(div, monday, saturday);
+
+  } else if (type === 'monthly') {
+    const target = new Date(now.getFullYear(), now.getMonth()+attReportOffset, 1);
+    document.getElementById('attReportPeriodLabel').textContent =
+      target.toLocaleDateString('en-IN',{month:'long',year:'numeric'});
+    renderAttMonthReport(div, target.getFullYear(), target.getMonth());
+
+  } else if (type === 'yearly') {
+    // Academic year June to May
+    const jsMonth = now.getMonth();
+    const baseYear = (jsMonth>=5) ? now.getFullYear() : now.getFullYear()-1;
+    const adjYear = baseYear + attReportOffset;
+    document.getElementById('attReportPeriodLabel').textContent =
+      `Academic Year: June ${adjYear} — May ${adjYear+1}`;
+    renderAttYearReport(div, adjYear);
+  }
+}
+
+function renderAttWeekReport(div, monday, saturday) {
+  const days = [];
+  for (let i=0;i<6;i++) { const d=new Date(monday); d.setDate(monday.getDate()+i); days.push(d); }
+  const divisions = div==='ALL' ? DIVISIONS.flatMap(g=>g.items) : [div];
+  let html = '';
+  divisions.forEach(d => {
+    const students = demoStudents[d]||[];
+    html += `<div style="margin-bottom:16px;"><div style="font-size:0.8rem;font-weight:800;color:var(--navy);margin-bottom:8px;padding:6px 10px;background:var(--cream-dark);border-radius:8px;">Class ${d} (${students.length} students)</div>`;
+    if (!students.length) { html += '<div style="font-size:0.8rem;color:var(--text-muted);padding:6px 10px;">No students</div></div>'; return; }
+    students.forEach(s => {
+      let pCount=0,aCount=0;
+      const dots = days.map(day => {
+        const key = `${fmtDateKey(day)}__${d}`;
+        const cancelled = demoCancelled[key];
+        const mark = (demoAttendance[key]||{})[s.id]||'';
+        if (cancelled) return '<span style="display:inline-block;width:24px;height:24px;background:var(--gold-pale);border-radius:5px;text-align:center;line-height:24px;font-size:0.65rem;font-weight:700;color:var(--gold);">H</span>';
+        if (mark==='P') { pCount++; return '<span style="display:inline-block;width:24px;height:24px;background:var(--green-light);border-radius:5px;text-align:center;line-height:24px;font-size:0.65rem;font-weight:700;color:var(--green);">P</span>'; }
+        if (mark==='A') { aCount++; return '<span style="display:inline-block;width:24px;height:24px;background:var(--red-light);border-radius:5px;text-align:center;line-height:24px;font-size:0.65rem;font-weight:700;color:var(--red);">A</span>'; }
+        return '<span style="display:inline-block;width:24px;height:24px;background:var(--cream-dark);border-radius:5px;text-align:center;line-height:24px;font-size:0.65rem;color:var(--text-muted);">—</span>';
+      }).join(' ');
+      html += `<div style="padding:8px 0;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:8px;">
+        <div style="min-width:110px;max-width:110px;">
+          <div style="font-size:0.8rem;font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${s.name}</div>
+          <div style="font-size:0.65rem;color:var(--text-muted);">${pCount}P ${aCount}A</div>
+        </div>
+        <div style="display:flex;gap:3px;flex-wrap:wrap;">${dots}</div>
+      </div>`;
+    });
+    html += '</div>';
+  });
+  document.getElementById('attReportContent').innerHTML = html || '<div class="empty-msg"><p>No data for this period.</p></div>';
+}
+
+function renderAttMonthReport(div, year, month) {
+  const daysInMonth = new Date(year,month+1,0).getDate();
+  const workingDays = [];
+  for (let d=1;d<=daysInMonth;d++) {
+    const date = new Date(year,month,d);
+    if (date.getDay()!==0) workingDays.push(date);
+  }
+  const divisions = div==='ALL' ? DIVISIONS.flatMap(g=>g.items) : [div];
+  let html = '';
+  divisions.forEach(dv => {
+    const students = demoStudents[dv]||[];
+    html += `<div style="margin-bottom:20px;"><div style="font-size:0.8rem;font-weight:800;color:var(--navy);margin-bottom:8px;padding:6px 10px;background:var(--cream-dark);border-radius:8px;">Class ${dv}</div>`;
+    if (!students.length) { html += '<div style="font-size:0.8rem;color:var(--text-muted);padding:6px;">No students</div></div>'; return; }
+    html += '<div style="overflow-x:auto;"><table style="border-collapse:collapse;font-size:0.72rem;width:100%;"><thead><tr><th style="text-align:left;padding:4px 6px;position:sticky;left:0;background:white;min-width:100px;">Student</th>';
+    workingDays.forEach(d => {
+      html += `<th style="padding:3px;text-align:center;min-width:24px;">${d.getDate()}<br><span style="font-size:0.55rem;color:var(--text-muted);">${d.toLocaleDateString('en-IN',{weekday:'narrow'})}</span></th>`;
+    });
+    html += '<th style="padding:4px;text-align:center;color:var(--green);">P</th><th style="padding:4px;text-align:center;color:var(--red);">A</th><th style="padding:4px;text-align:center;">%</th></tr></thead><tbody>';
+    students.forEach((s,idx) => {
+      let pCount=0,aCount=0;
+      html += `<tr style="background:${idx%2===0?'white':'var(--cream)'}"><td style="padding:4px 6px;font-weight:700;position:sticky;left:0;background:${idx%2===0?'white':'var(--cream)'};">${s.name}</td>`;
+      workingDays.forEach(d => {
+        const key = `${fmtDateKey(d)}__${dv}`;
+        const cancelled = demoCancelled[key];
+        const mark = (demoAttendance[key]||{})[s.id]||'';
+        if (cancelled) html += `<td style="text-align:center;background:var(--gold-pale);color:var(--gold);font-weight:700;font-size:0.65rem;">H</td>`;
+        else if (mark==='P') { pCount++; html += `<td style="text-align:center;background:var(--green-light);color:var(--green);font-weight:700;">P</td>`; }
+        else if (mark==='A') { aCount++; html += `<td style="text-align:center;background:var(--red-light);color:var(--red);font-weight:700;">A</td>`; }
+        else html += `<td style="text-align:center;color:var(--border);">—</td>`;
+      });
+      const pct = pCount+aCount>0?Math.round(pCount/(pCount+aCount)*100):'—';
+      const pc = typeof pct==='number'?(pct>=75?'var(--green)':pct>=50?'var(--gold)':'var(--red)'):'var(--text-muted)';
+      html += `<td style="text-align:center;font-weight:800;color:var(--green);padding:4px;">${pCount}</td><td style="text-align:center;font-weight:800;color:var(--red);padding:4px;">${aCount}</td><td style="text-align:center;font-weight:800;color:${pc};padding:4px;">${typeof pct==='number'?pct+'%':pct}</td></tr>`;
+    });
+    html += '</tbody></table></div></div>';
+  });
+  document.getElementById('attReportContent').innerHTML = html;
+}
+
+function renderAttYearReport(div, baseYear) {
+  const academicMonths = [];
+  // Jun-Dec of baseYear, Jan-May of baseYear+1
+  for (let m=5;m<=11;m++) academicMonths.push(new Date(baseYear,m,1));
+  for (let m=0;m<=4;m++)  academicMonths.push(new Date(baseYear+1,m,1));
+
+  const divisions = div==='ALL' ? DIVISIONS.flatMap(g=>g.items) : [div];
+  let html = '';
+  divisions.forEach(dv => {
+    const students = demoStudents[dv]||[];
+    html += `<div style="margin-bottom:20px;"><div style="font-size:0.8rem;font-weight:800;color:var(--navy);margin-bottom:8px;padding:6px 10px;background:var(--cream-dark);border-radius:8px;">Class ${dv}</div>`;
+    if (!students.length) { html += '<div style="font-size:0.8rem;color:var(--text-muted);padding:6px;">No students</div></div>'; return; }
+    html += '<div style="overflow-x:auto;"><table style="border-collapse:collapse;font-size:0.72rem;width:100%;"><thead><tr><th style="text-align:left;padding:4px 6px;position:sticky;left:0;background:white;min-width:100px;">Student</th>';
+    academicMonths.forEach(m => {
+      html += `<th style="padding:3px 4px;text-align:center;min-width:36px;">${m.toLocaleDateString('en-IN',{month:'short'})}<br><span style="font-size:0.55rem;">'${String(m.getFullYear()).slice(2)}</span></th>`;
+    });
+    html += '<th style="padding:4px;color:var(--green);">P</th><th style="padding:4px;color:var(--red);">A</th><th style="padding:4px;">%</th></tr></thead><tbody>';
+    students.forEach((s,idx) => {
+      let totalP=0,totalA=0;
+      html += `<tr style="background:${idx%2===0?'white':'var(--cream)'}"><td style="padding:4px 6px;font-weight:700;position:sticky;left:0;background:${idx%2===0?'white':'var(--cream)'};">${s.name}</td>`;
+      academicMonths.forEach(m => {
+        const yr=m.getFullYear(),mn=m.getMonth();
+        const daysInMon = new Date(yr,mn+1,0).getDate();
+        let mP=0,mA=0;
+        for (let d=1;d<=daysInMon;d++) {
+          const date=new Date(yr,mn,d);
+          if (date.getDay()===0) continue;
+          const key=`${fmtDateKey(date)}__${dv}`;
+          const mark=(demoAttendance[key]||{})[s.id]||'';
+          if (mark==='P') mP++;
+          else if (mark==='A') mA++;
+        }
+        totalP+=mP; totalA+=mA;
+        const mPct=mP+mA>0?Math.round(mP/(mP+mA)*100):'—';
+        const mc=typeof mPct==='number'?(mPct>=75?'var(--green)':mPct>=50?'var(--gold)':'var(--red)'):'var(--text-muted)';
+        html += `<td style="text-align:center;font-size:0.7rem;font-weight:700;color:${mc};padding:3px;">${typeof mPct==='number'?mPct+'%':mPct}</td>`;
+      });
+      const yPct=totalP+totalA>0?Math.round(totalP/(totalP+totalA)*100):'—';
+      const yc=typeof yPct==='number'?(yPct>=75?'var(--green)':yPct>=50?'var(--gold)':'var(--red)'):'var(--text-muted)';
+      html += `<td style="text-align:center;font-weight:800;color:var(--green);padding:4px;">${totalP}</td><td style="text-align:center;font-weight:800;color:var(--red);padding:4px;">${totalA}</td><td style="text-align:center;font-weight:800;color:${yc};padding:4px;">${typeof yPct==='number'?yPct+'%':yPct}</td></tr>`;
+    });
+    html += '</tbody></table></div></div>';
+  });
+  document.getElementById('attReportContent').innerHTML = html;
+}
+
+// ══════════════════════════════════════════════════════
+//  FEE COLLECTION REPORT
+// ══════════════════════════════════════════════════════
+let feeReportType = 'daily';
+let feeReportOffset = 0;
+
+function openFeeReport() {
+  feeReportType = 'daily';
+  feeReportOffset = 0;
+  setFeeReportType('daily');
+  openModal('feeReportModal');
+}
+
+function setFeeReportType(type) {
+  feeReportType = type;
+  feeReportOffset = 0;
+  ['daily','weekly','monthly'].forEach(t => {
+    const btn = document.getElementById('feeRpt'+t.charAt(0).toUpperCase()+t.slice(1));
+    if (btn) btn.className = t===type ? 'btn-xs primary' : 'btn-xs';
+  });
+  renderFeeReport();
+}
+
+function feeReportNav(delta) {
+  feeReportOffset += delta;
+  renderFeeReport();
+}
+
+function renderFeeReport() {
+  const now = new Date();
+  let startDate, endDate, label;
+
+  if (feeReportType === 'daily') {
+    const d = new Date(now);
+    d.setDate(d.getDate() + feeReportOffset);
+    startDate = endDate = fmtDateKey(d);
+    label = isToday(d) ? 'Today — ' + fmtDate(d) : fmtDate(d);
+    // Block future
+    if (isFuture(d)) { feeReportOffset--; return; }
+
+  } else if (feeReportType === 'weekly') {
+    const base = new Date(now);
+    base.setDate(now.getDate() + feeReportOffset * 7);
+    const day = base.getDay();
+    const monday = new Date(base);
+    monday.setDate(base.getDate() - (day===0?6:day-1));
+    const saturday = new Date(monday); saturday.setDate(monday.getDate()+5);
+    startDate = fmtDateKey(monday);
+    endDate   = fmtDateKey(saturday);
+    label = `${fmtDate(monday)} — ${fmtDate(saturday)}`;
+
+  } else { // monthly
+    const target = new Date(now.getFullYear(), now.getMonth()+feeReportOffset, 1);
+    const yr=target.getFullYear(),mn=target.getMonth();
+    startDate = `${yr}-${String(mn+1).padStart(2,'0')}-01`;
+    endDate   = `${yr}-${String(mn+1).padStart(2,'0')}-31`;
+    label = target.toLocaleDateString('en-IN',{month:'long',year:'numeric'});
+  }
+
+  document.getElementById('feeReportPeriodLabel').textContent = label;
+
+  // Build report from demo payments audit
+  // demoPayments keys: "div__studentId__monthKey"
+  // We need to match by date — use demoAttendance meta approach
+  // For demo: scan all audit entries stored in localStorage
+  const auditRaw = JSON.parse(localStorage.getItem('tm_fee_audit')||'[]');
+  const filtered = auditRaw.filter(e => e.dateKey >= startDate && e.dateKey <= endDate);
+
+  let totalCollected = 0;
+  filtered.forEach(e => totalCollected += e.amount);
+  document.getElementById('feeReportTotal').textContent = `₹${totalCollected.toLocaleString('en-IN')}`;
+
+  if (!filtered.length) {
+    document.getElementById('feeReportContent').innerHTML = '<div class="empty-msg" style="padding:20px 0"><p>No payments recorded for this period.</p></div>';
+    return;
+  }
+
+  let html = filtered.map(e => `
+    <div style="background:white;border:1px solid var(--border);border-radius:10px;padding:12px 14px;margin-bottom:8px;">
+      <div style="display:flex;justify-content:space-between;align-items:start;margin-bottom:6px;">
+        <div>
+          <div style="font-size:0.9rem;font-weight:800;color:var(--navy);">${e.studentName}</div>
+          <div style="font-size:0.7rem;color:var(--text-muted);">${e.studentId} · Class ${e.division}</div>
+        </div>
+        <div style="font-size:1rem;font-weight:800;color:var(--green);">₹${e.amount.toLocaleString('en-IN')}</div>
+      </div>
+      <div style="font-size:0.75rem;color:var(--text-mid);background:var(--cream);border-radius:6px;padding:6px 10px;">
+        <span style="font-weight:700;">Months:</span> ${e.months}
+      </div>
+      <div style="font-size:0.7rem;color:var(--text-muted);margin-top:6px;display:flex;justify-content:space-between;">
+        <span>📅 ${e.date} · ${e.time}</span>
+        <span>👤 ${e.teacher}</span>
+      </div>
+    </div>`).join('');
+
+  document.getElementById('feeReportContent').innerHTML = html;
+}
+
+// Override recordPayments to also write to fee audit log
+const _origProcessNext = processNextStudent;
+async function processNextStudent() {
+  if (state.receiptIndex >= state.receiptQueue.length) return;
+  const student = state.receiptQueue[state.receiptIndex];
+  const months  = [...state.selectedMonths];
+  showLoading(true);
+  const res = await api('recordPayments', {
+    division:state.division, studentId:student.id, studentName:student.name,
+    months, teacher:state.user.name, teacherRole:state.user.role,
+  });
+  showLoading(false);
+  if (res.success) {
+    months.forEach(m => {
+      if (!state.payments[student.id]) state.payments[student.id]={};
+      state.payments[student.id][m] = true;
+    });
+    // Save to fee audit log
+    const now = new Date();
+    const auditRaw = JSON.parse(localStorage.getItem('tm_fee_audit')||'[]');
+    auditRaw.push({
+      receiptNo: res.receiptNo,
+      dateKey: fmtDateKey(now),
+      date: res.date, time: res.time,
+      studentId: student.id, studentName: student.name,
+      division: state.division, months: months.join(', '),
+      amount: months.length * FEE,
+      teacher: state.user.name,
+    });
+    localStorage.setItem('tm_fee_audit', JSON.stringify(auditRaw));
+    showReceipt(student, months, res);
+  } else {
+    showToast(res.error||'Error recording payment','error');
+    state.receiptIndex++;
+    if (state.receiptIndex < state.receiptQueue.length) setTimeout(processNextStudent,500);
+    else finalizeReceipts();
+  }
 }
 
 </script>
