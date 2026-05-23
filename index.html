@@ -245,6 +245,121 @@ body{font-family:'DM Sans',Arial,sans-serif;background:var(--cream);color:var(--
 .module-tab.active-tab .mt-label{color:white;}
 .module-tab .mt-sub{font-size:0.68rem;color:var(--text-muted);}
 .module-tab.active-tab .mt-sub{color:rgba(255,255,255,0.6);}
+
+/* ══ ATTENDANCE REPORTS ══════════════════════════════ */
+.att-report-wrap { padding: 0; }
+.report-division-header {
+  font-size:0.82rem;font-weight:800;color:var(--navy);
+  padding:8px 12px;background:var(--cream-dark);
+  border-radius:8px;margin-bottom:10px;
+  display:flex;justify-content:space-between;align-items:center;
+}
+.report-division-header .class-avg {
+  font-size:0.75rem;font-weight:700;
+  padding:2px 8px;border-radius:20px;
+  background:var(--navy);color:white;
+}
+
+/* Week view student row */
+.week-student-row {
+  display:flex;align-items:center;
+  padding:9px 10px;
+  border-radius:8px;
+  margin-bottom:5px;
+  background:white;
+  border:1px solid var(--border);
+  gap:10px;
+}
+.week-student-row.has-absent {
+  border-color:var(--red);
+  background:var(--red-light);
+}
+.week-student-name {
+  flex:1;min-width:0;
+  font-size:0.85rem;font-weight:700;
+  white-space:nowrap;overflow:hidden;text-overflow:ellipsis;
+}
+.week-student-row.has-absent .week-student-name { color:var(--red); }
+.week-stats {
+  display:flex;gap:6px;align-items:center;flex-shrink:0;
+}
+.week-stat-p {
+  font-size:0.75rem;font-weight:800;
+  color:var(--green);
+  background:var(--green-light);
+  padding:2px 7px;border-radius:20px;
+}
+.week-stat-a {
+  font-size:0.75rem;font-weight:800;
+  color:var(--red);
+  background:var(--red-light);
+  padding:2px 7px;border-radius:20px;
+}
+.week-bar {
+  display:flex;gap:2px;flex-shrink:0;
+}
+.week-bar-dot {
+  width:10px;height:10px;border-radius:3px;
+}
+.week-bar-dot.p { background:var(--green); }
+.week-bar-dot.a { background:var(--red); }
+.week-bar-dot.h { background:var(--gold-light); }
+.week-bar-dot.n { background:var(--border); }
+
+/* Week summary footer */
+.week-summary-footer {
+  background:var(--navy);color:white;
+  border-radius:8px;padding:10px 14px;
+  display:flex;justify-content:space-between;
+  align-items:center;margin-top:8px;
+  font-size:0.82rem;font-weight:700;
+}
+
+/* Month view */
+.month-student-card {
+  background:white;border:1px solid var(--border);
+  border-radius:8px;padding:10px 12px;
+  margin-bottom:6px;
+  display:flex;align-items:center;gap:10px;
+}
+.month-student-card.low-att {
+  border-color:var(--red);background:var(--red-light);
+}
+.month-student-card.mid-att {
+  border-color:var(--gold);background:var(--gold-pale);
+}
+.month-pct-badge {
+  width:44px;height:44px;border-radius:50%;
+  display:flex;align-items:center;justify-content:center;
+  font-size:0.75rem;font-weight:800;
+  flex-shrink:0;
+}
+.month-pct-badge.high { background:var(--green-light);color:var(--green); }
+.month-pct-badge.mid  { background:var(--gold-pale);color:var(--gold); }
+.month-pct-badge.low  { background:var(--red-light);color:var(--red); }
+.month-pct-badge.none { background:var(--cream-dark);color:var(--text-muted); }
+
+/* Yearly view */
+.year-student-row {
+  background:white;border:1px solid var(--border);
+  border-radius:8px;padding:10px 12px;margin-bottom:6px;
+}
+.year-student-header {
+  display:flex;justify-content:space-between;
+  align-items:center;margin-bottom:6px;
+}
+.year-month-chips {
+  display:flex;gap:4px;flex-wrap:wrap;
+}
+.year-month-chip {
+  font-size:0.65rem;font-weight:800;
+  padding:2px 6px;border-radius:6px;
+}
+.year-month-chip.high { background:var(--green-light);color:var(--green); }
+.year-month-chip.mid  { background:var(--gold-pale);color:var(--gold); }
+.year-month-chip.low  { background:var(--red-light);color:var(--red); }
+.year-month-chip.na   { background:var(--cream-dark);color:var(--text-muted); }
+
 </style>
 </head>
 <body>
@@ -809,6 +924,14 @@ let demoPayments  = JSON.parse(localStorage.getItem('tm_payments') || '{}');
 let demoStudents  = JSON.parse(localStorage.getItem('tm_students') || '{}');
 let demoReceipt   = parseInt(localStorage.getItem('tm_receipt') || '1000');
 
+// Migration: ensure all existing students have whatsapp field
+Object.keys(demoStudents).forEach(div => {
+  demoStudents[div] = (demoStudents[div]||[]).map(s => ({
+    ...s, whatsapp: s.whatsapp || s.contact || ''
+  }));
+});
+saveDemoState();
+
 function saveDemoState() {
   localStorage.setItem('tm_payments', JSON.stringify(demoPayments));
   localStorage.setItem('tm_students', JSON.stringify(demoStudents));
@@ -841,7 +964,12 @@ function demoApi(action, payload) {
       return u ? {success:true, user:{name:u.name,role:u.role}} : {success:false,error:'Invalid PIN'};
     }
     case 'getStudents': {
-      return { success:true, students: demoStudents[payload.division] || [] };
+      // Ensure all students have whatsapp field
+      const students = (demoStudents[payload.division] || []).map(s => ({
+        ...s,
+        whatsapp: s.whatsapp || s.contact || ''
+      }));
+      return { success:true, students };
     }
     case 'getPayments': {
       const p = {};
@@ -1114,7 +1242,7 @@ function renderStudents() {
     let badge = '';
     if (allPaid)       badge = '<span class="paid-badge">All Paid</span>';
     else if (somePaid) badge = '<span class="paid-badge" style="background:var(--gold);color:var(--navy)">Partial</span>';
-    const waLine = s.whatsapp ? `<div class="s-wa">📱 ${s.whatsapp}</div>` : '';
+    const waLine = s.whatsapp && s.whatsapp.length===10 ? `<div class="s-wa">📱 ${s.whatsapp}</div>` : '';
     card.innerHTML = `
       <div class="s-checkbox">${(selected||allPaid)?'✓':''}</div>
       <div class="s-info">
@@ -1251,7 +1379,7 @@ function renderManageList() {
       <div class="manage-row-info">
         <div class="manage-row-name">${s.name}</div>
         <div class="manage-row-sub">${s.id}</div>
-        <div class="manage-row-wa">${s.whatsapp ? '📱 '+s.whatsapp : '⚠ No WhatsApp number'}</div>
+        <div class="manage-row-wa">${s.whatsapp && s.whatsapp.length===10 ? '📱 '+s.whatsapp : '⚠ No WhatsApp number'}</div>
       </div>
       <button class="btn-manage btn-edit" onclick="openEditStudent('${s.id}')">✏ Edit</button>
       <button class="btn-manage btn-remove" onclick="removeStudent('${s.id}','${s.name.replace(/'/g,'')}')">🗑</button>
@@ -1961,7 +2089,7 @@ function renderMgmtList(div, students) {
       <div class="manage-row-info">
         <div class="manage-row-name">${s.name}</div>
         <div class="manage-row-sub">${s.id}</div>
-        <div class="manage-row-wa">${s.whatsapp ? '📱 '+s.whatsapp : '⚠ No WhatsApp'}</div>
+        <div class="manage-row-wa">${s.whatsapp && s.whatsapp.length===10 ? '📱 '+s.whatsapp : '⚠ No WhatsApp'}</div>
       </div>
       <button class="btn-manage btn-edit" onclick="openAttEdit('${s.id}','${div}')">✏</button>
       <button class="btn-manage btn-remove" onclick="mgmtRemove('${s.id}','${s.name.replace(/'/g,'')}','${div}')">🗑</button>
@@ -2095,36 +2223,88 @@ function renderAttReport() {
 }
 
 function renderAttWeekReport(div, monday, saturday) {
+  // Build 6 working days Mon-Sat
   const days = [];
-  for (let i=0;i<6;i++) { const d=new Date(monday); d.setDate(monday.getDate()+i); days.push(d); }
+  for (let i=0;i<6;i++) {
+    const d=new Date(monday);
+    d.setDate(monday.getDate()+i);
+    days.push(d);
+  }
+
   const divisions = div==='ALL' ? DIVISIONS.flatMap(g=>g.items) : [div];
   let html = '';
-  divisions.forEach(d => {
-    const students = demoStudents[d]||[];
-    html += `<div style="margin-bottom:16px;"><div style="font-size:0.8rem;font-weight:800;color:var(--navy);margin-bottom:8px;padding:6px 10px;background:var(--cream-dark);border-radius:8px;">Class ${d} (${students.length} students)</div>`;
-    if (!students.length) { html += '<div style="font-size:0.8rem;color:var(--text-muted);padding:6px 10px;">No students</div></div>'; return; }
-    students.forEach(s => {
-      let pCount=0,aCount=0;
-      const dots = days.map(day => {
-        const key = `${fmtDateKey(day)}__${d}`;
-        const cancelled = demoCancelled[key];
-        const mark = (demoAttendance[key]||{})[s.id]||'';
-        if (cancelled) return '<span style="display:inline-block;width:24px;height:24px;background:var(--gold-pale);border-radius:5px;text-align:center;line-height:24px;font-size:0.65rem;font-weight:700;color:var(--gold);">H</span>';
-        if (mark==='P') { pCount++; return '<span style="display:inline-block;width:24px;height:24px;background:var(--green-light);border-radius:5px;text-align:center;line-height:24px;font-size:0.65rem;font-weight:700;color:var(--green);">P</span>'; }
-        if (mark==='A') { aCount++; return '<span style="display:inline-block;width:24px;height:24px;background:var(--red-light);border-radius:5px;text-align:center;line-height:24px;font-size:0.65rem;font-weight:700;color:var(--red);">A</span>'; }
-        return '<span style="display:inline-block;width:24px;height:24px;background:var(--cream-dark);border-radius:5px;text-align:center;line-height:24px;font-size:0.65rem;color:var(--text-muted);">—</span>';
-      }).join(' ');
-      html += `<div style="padding:8px 0;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:8px;">
-        <div style="min-width:110px;max-width:110px;">
-          <div style="font-size:0.8rem;font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${s.name}</div>
-          <div style="font-size:0.65rem;color:var(--text-muted);">${pCount}P ${aCount}A</div>
+
+  divisions.forEach(dv => {
+    const students = demoStudents[dv]||[];
+    let divTotalP=0, divTotalA=0, divTotalH=0;
+
+    // Day headers
+    const dayHeaders = days.map(d =>
+      `<div style="text-align:center;font-size:0.65rem;font-weight:700;color:var(--text-muted);">
+        ${d.toLocaleDateString('en-IN',{weekday:'narrow'})}<br>
+        <span style="color:var(--navy)">${d.getDate()}</span>
+      </div>`
+    ).join('');
+
+    let studentRows = '';
+    if (!students.length) {
+      studentRows = '<div style="font-size:0.82rem;color:var(--text-muted);padding:10px 0;text-align:center;">No students in this division</div>';
+    } else {
+      students.forEach(s => {
+        let pCount=0, aCount=0, hCount=0;
+        const barDots = days.map(day => {
+          const key = `${fmtDateKey(day)}__${dv}`;
+          const cancelled = demoCancelled[key];
+          const mark = (demoAttendance[key]||{})[s.id]||'';
+          if (cancelled) { hCount++; return '<div class="week-bar-dot h"></div>'; }
+          if (mark==='P') { pCount++; return '<div class="week-bar-dot p"></div>'; }
+          if (mark==='A') { aCount++; return '<div class="week-bar-dot a"></div>'; }
+          return '<div class="week-bar-dot n"></div>';
+        }).join('');
+
+        divTotalP += pCount;
+        divTotalA += aCount;
+        divTotalH += hCount;
+
+        const hasAbsent = aCount > 0;
+        studentRows += `
+          <div class="week-student-row${hasAbsent?' has-absent':''}">
+            <div class="week-student-name">${s.name}</div>
+            <div class="week-stats">
+              <span class="week-stat-p">${pCount}P</span>
+              ${aCount>0?`<span class="week-stat-a">${aCount}A</span>`:''}
+              ${hCount>0?`<span style="font-size:0.72rem;color:var(--gold);font-weight:700;">${hCount}H</span>`:''}
+            </div>
+            <div class="week-bar">${barDots}</div>
+          </div>`;
+      });
+    }
+
+    const divTotal = divTotalP + divTotalA;
+    const divPct = divTotal > 0 ? Math.round(divTotalP/divTotal*100) : 0;
+    const pctColor = divPct>=75?'#5CB87A':divPct>=50?'var(--gold)':'var(--red)';
+
+    html += `
+      <div style="margin-bottom:20px;">
+        <div class="report-division-header">
+          <span>Class ${dv} · ${students.length} students</span>
+          <span class="class-avg" style="background:${pctColor}">${divPct}% avg</span>
         </div>
-        <div style="display:flex;gap:3px;flex-wrap:wrap;">${dots}</div>
+        <div style="display:grid;grid-template-columns:1fr repeat(6,28px);gap:4px;padding:6px 10px;margin-bottom:6px;background:var(--cream);border-radius:6px;">
+          <div style="font-size:0.65rem;font-weight:700;color:var(--text-muted);">Student</div>
+          ${dayHeaders}
+        </div>
+        ${studentRows}
+        <div class="week-summary-footer">
+          <span>Class Total</span>
+          <span>${divTotalP}P · ${divTotalA}A · ${divTotalH}H</span>
+          <span style="color:${pctColor}">${divPct}%</span>
+        </div>
       </div>`;
-    });
-    html += '</div>';
   });
-  document.getElementById('attReportContent').innerHTML = html || '<div class="empty-msg"><p>No data for this period.</p></div>';
+
+  document.getElementById('attReportContent').innerHTML =
+    html || '<div class="empty-msg"><p>No data for this period.</p></div>';
 }
 
 function renderAttMonthReport(div, year, month) {
@@ -2134,83 +2314,163 @@ function renderAttMonthReport(div, year, month) {
     const date = new Date(year,month,d);
     if (date.getDay()!==0) workingDays.push(date);
   }
+  const totalWorkingDays = workingDays.length;
   const divisions = div==='ALL' ? DIVISIONS.flatMap(g=>g.items) : [div];
   let html = '';
+
   divisions.forEach(dv => {
     const students = demoStudents[dv]||[];
-    html += `<div style="margin-bottom:20px;"><div style="font-size:0.8rem;font-weight:800;color:var(--navy);margin-bottom:8px;padding:6px 10px;background:var(--cream-dark);border-radius:8px;">Class ${dv}</div>`;
-    if (!students.length) { html += '<div style="font-size:0.8rem;color:var(--text-muted);padding:6px;">No students</div></div>'; return; }
-    html += '<div style="overflow-x:auto;"><table style="border-collapse:collapse;font-size:0.72rem;width:100%;"><thead><tr><th style="text-align:left;padding:4px 6px;position:sticky;left:0;background:white;min-width:100px;">Student</th>';
-    workingDays.forEach(d => {
-      html += `<th style="padding:3px;text-align:center;min-width:24px;">${d.getDate()}<br><span style="font-size:0.55rem;color:var(--text-muted);">${d.toLocaleDateString('en-IN',{weekday:'narrow'})}</span></th>`;
-    });
-    html += '<th style="padding:4px;text-align:center;color:var(--green);">P</th><th style="padding:4px;text-align:center;color:var(--red);">A</th><th style="padding:4px;text-align:center;">%</th></tr></thead><tbody>';
-    students.forEach((s,idx) => {
-      let pCount=0,aCount=0;
-      html += `<tr style="background:${idx%2===0?'white':'var(--cream)'}"><td style="padding:4px 6px;font-weight:700;position:sticky;left:0;background:${idx%2===0?'white':'var(--cream)'};">${s.name}</td>`;
-      workingDays.forEach(d => {
-        const key = `${fmtDateKey(d)}__${dv}`;
-        const cancelled = demoCancelled[key];
-        const mark = (demoAttendance[key]||{})[s.id]||'';
-        if (cancelled) html += `<td style="text-align:center;background:var(--gold-pale);color:var(--gold);font-weight:700;font-size:0.65rem;">H</td>`;
-        else if (mark==='P') { pCount++; html += `<td style="text-align:center;background:var(--green-light);color:var(--green);font-weight:700;">P</td>`; }
-        else if (mark==='A') { aCount++; html += `<td style="text-align:center;background:var(--red-light);color:var(--red);font-weight:700;">A</td>`; }
-        else html += `<td style="text-align:center;color:var(--border);">—</td>`;
+    let divTotalP=0, divTotalA=0;
+
+    let studentCards = '';
+    if (!students.length) {
+      studentCards = '<div style="font-size:0.82rem;color:var(--text-muted);padding:10px;text-align:center;">No students</div>';
+    } else {
+      students.forEach(s => {
+        let pCount=0, aCount=0, hCount=0;
+        workingDays.forEach(day => {
+          const key = `${fmtDateKey(day)}__${dv}`;
+          const cancelled = demoCancelled[key];
+          const mark = (demoAttendance[key]||{})[s.id]||'';
+          if (cancelled) hCount++;
+          else if (mark==='P') pCount++;
+          else if (mark==='A') aCount++;
+        });
+        divTotalP += pCount;
+        divTotalA += aCount;
+        const effectiveDays = totalWorkingDays - hCount;
+        const pct = effectiveDays>0 ? Math.round(pCount/effectiveDays*100) : null;
+        const pctLabel = pct!==null ? pct+'%' : '—';
+        const attClass = pct===null?'none':pct>=75?'high':pct>=50?'mid':'low';
+        const cardClass = pct!==null&&pct<50?'low-att':pct!==null&&pct<75?'mid-att':'';
+
+        studentCards += `
+          <div class="month-student-card ${cardClass}">
+            <div class="month-pct-badge ${attClass}">${pctLabel}</div>
+            <div style="flex:1;min-width:0;">
+              <div style="font-size:0.88rem;font-weight:700;">${s.name}</div>
+              <div style="font-size:0.7rem;color:var(--text-muted);margin-top:2px;">${s.id}</div>
+            </div>
+            <div style="text-align:right;flex-shrink:0;">
+              <div style="font-size:0.78rem;font-weight:700;">
+                <span style="color:var(--green);">${pCount}P</span>
+                <span style="color:var(--text-muted);margin:0 2px;">·</span>
+                <span style="color:var(--red);">${aCount}A</span>
+                ${hCount>0?`<span style="color:var(--gold);margin-left:3px;">${hCount}H</span>`:''}
+              </div>
+              <div style="font-size:0.65rem;color:var(--text-muted);">of ${effectiveDays} days</div>
+            </div>
+          </div>`;
       });
-      const pct = pCount+aCount>0?Math.round(pCount/(pCount+aCount)*100):'—';
-      const pc = typeof pct==='number'?(pct>=75?'var(--green)':pct>=50?'var(--gold)':'var(--red)'):'var(--text-muted)';
-      html += `<td style="text-align:center;font-weight:800;color:var(--green);padding:4px;">${pCount}</td><td style="text-align:center;font-weight:800;color:var(--red);padding:4px;">${aCount}</td><td style="text-align:center;font-weight:800;color:${pc};padding:4px;">${typeof pct==='number'?pct+'%':pct}</td></tr>`;
-    });
-    html += '</tbody></table></div></div>';
+    }
+
+    const divEffective = (totalWorkingDays - 0) * students.length;
+    const divPct = divTotalP+divTotalA>0 ? Math.round(divTotalP/(divTotalP+divTotalA)*100) : 0;
+    const pctColor = divPct>=75?'#5CB87A':divPct>=50?'var(--gold)':'var(--red)';
+
+    html += `
+      <div style="margin-bottom:20px;">
+        <div class="report-division-header">
+          <span>Class ${dv} · ${students.length} students · ${totalWorkingDays} working days</span>
+          <span class="class-avg" style="background:${pctColor}">${divPct}%</span>
+        </div>
+        ${studentCards}
+        <div class="week-summary-footer">
+          <span>Class Total</span>
+          <span>${divTotalP}P · ${divTotalA}A</span>
+          <span style="color:${pctColor}">${divPct}% avg</span>
+        </div>
+      </div>`;
   });
-  document.getElementById('attReportContent').innerHTML = html;
+
+  document.getElementById('attReportContent').innerHTML =
+    html || '<div class="empty-msg"><p>No attendance data for this month.</p></div>';
 }
 
 function renderAttYearReport(div, baseYear) {
+  // Academic months: Jun-Dec of baseYear, Jan-May of baseYear+1
   const academicMonths = [];
-  // Jun-Dec of baseYear, Jan-May of baseYear+1
-  for (let m=5;m<=11;m++) academicMonths.push(new Date(baseYear,m,1));
-  for (let m=0;m<=4;m++)  academicMonths.push(new Date(baseYear+1,m,1));
+  for (let m=5;m<=11;m++) academicMonths.push({ date:new Date(baseYear,m,1),   label: new Date(baseYear,m,1).toLocaleDateString('en-IN',{month:'short'})+' \''+String(baseYear).slice(2) });
+  for (let m=0;m<=4;m++)  academicMonths.push({ date:new Date(baseYear+1,m,1), label: new Date(baseYear+1,m,1).toLocaleDateString('en-IN',{month:'short'})+' \''+String(baseYear+1).slice(2) });
 
   const divisions = div==='ALL' ? DIVISIONS.flatMap(g=>g.items) : [div];
   let html = '';
+
   divisions.forEach(dv => {
     const students = demoStudents[dv]||[];
-    html += `<div style="margin-bottom:20px;"><div style="font-size:0.8rem;font-weight:800;color:var(--navy);margin-bottom:8px;padding:6px 10px;background:var(--cream-dark);border-radius:8px;">Class ${dv}</div>`;
-    if (!students.length) { html += '<div style="font-size:0.8rem;color:var(--text-muted);padding:6px;">No students</div></div>'; return; }
-    html += '<div style="overflow-x:auto;"><table style="border-collapse:collapse;font-size:0.72rem;width:100%;"><thead><tr><th style="text-align:left;padding:4px 6px;position:sticky;left:0;background:white;min-width:100px;">Student</th>';
-    academicMonths.forEach(m => {
-      html += `<th style="padding:3px 4px;text-align:center;min-width:36px;">${m.toLocaleDateString('en-IN',{month:'short'})}<br><span style="font-size:0.55rem;">'${String(m.getFullYear()).slice(2)}</span></th>`;
-    });
-    html += '<th style="padding:4px;color:var(--green);">P</th><th style="padding:4px;color:var(--red);">A</th><th style="padding:4px;">%</th></tr></thead><tbody>';
-    students.forEach((s,idx) => {
-      let totalP=0,totalA=0;
-      html += `<tr style="background:${idx%2===0?'white':'var(--cream)'}"><td style="padding:4px 6px;font-weight:700;position:sticky;left:0;background:${idx%2===0?'white':'var(--cream)'};">${s.name}</td>`;
-      academicMonths.forEach(m => {
-        const yr=m.getFullYear(),mn=m.getMonth();
-        const daysInMon = new Date(yr,mn+1,0).getDate();
-        let mP=0,mA=0;
-        for (let d=1;d<=daysInMon;d++) {
-          const date=new Date(yr,mn,d);
-          if (date.getDay()===0) continue;
-          const key=`${fmtDateKey(date)}__${dv}`;
-          const mark=(demoAttendance[key]||{})[s.id]||'';
-          if (mark==='P') mP++;
-          else if (mark==='A') mA++;
-        }
-        totalP+=mP; totalA+=mA;
-        const mPct=mP+mA>0?Math.round(mP/(mP+mA)*100):'—';
-        const mc=typeof mPct==='number'?(mPct>=75?'var(--green)':mPct>=50?'var(--gold)':'var(--red)'):'var(--text-muted)';
-        html += `<td style="text-align:center;font-size:0.7rem;font-weight:700;color:${mc};padding:3px;">${typeof mPct==='number'?mPct+'%':mPct}</td>`;
+    let yearTotalP=0, yearTotalA=0;
+
+    let studentRows = '';
+    if (!students.length) {
+      studentRows = '<div style="font-size:0.82rem;color:var(--text-muted);padding:10px;text-align:center;">No students</div>';
+    } else {
+      students.forEach(s => {
+        let totalP=0, totalA=0;
+        const monthChips = academicMonths.map(({ date:m, label }) => {
+          const yr=m.getFullYear(), mn=m.getMonth();
+          const daysInMon = new Date(yr,mn+1,0).getDate();
+          let mP=0, mA=0, mH=0;
+          for (let d=1;d<=daysInMon;d++) {
+            const date=new Date(yr,mn,d);
+            if (date.getDay()===0) continue;
+            const key=`${fmtDateKey(date)}__${dv}`;
+            const cancelled=demoCancelled[key];
+            const mark=(demoAttendance[key]||{})[s.id]||'';
+            if (cancelled) mH++;
+            else if (mark==='P') mP++;
+            else if (mark==='A') mA++;
+          }
+          totalP+=mP; totalA+=mA;
+          const effective=mP+mA;
+          const pct = effective>0 ? Math.round(mP/effective*100) : null;
+          const chipClass = pct===null?'na':pct>=75?'high':pct>=50?'mid':'low';
+          const pctLabel = pct!==null ? pct+'%' : '—';
+          return `<div class="year-month-chip ${chipClass}" title="${label}: ${mP}P ${mA}A">${label.split(' ')[0]}<br>${pctLabel}</div>`;
+        }).join('');
+
+        yearTotalP += totalP;
+        yearTotalA += totalA;
+        const yearPct = totalP+totalA>0 ? Math.round(totalP/(totalP+totalA)*100) : null;
+        const yearPctLabel = yearPct!==null ? yearPct+'%' : '—';
+        const pctColor = yearPct===null?'var(--text-muted)':yearPct>=75?'var(--green)':yearPct>=50?'var(--gold)':'var(--red)';
+        const cardBg = yearPct!==null&&yearPct<50?'border-color:var(--red);background:var(--red-light);':yearPct!==null&&yearPct<75?'border-color:var(--gold);background:var(--gold-pale);':'';
+
+        studentRows += `
+          <div class="year-student-row" style="${cardBg}">
+            <div class="year-student-header">
+              <div>
+                <div style="font-size:0.88rem;font-weight:700;">${s.name}</div>
+                <div style="font-size:0.7rem;color:var(--text-muted);">${s.id} · ${totalP}P ${totalA}A</div>
+              </div>
+              <div style="font-size:1rem;font-weight:800;color:${pctColor};">${yearPctLabel}</div>
+            </div>
+            <div class="year-month-chips">${monthChips}</div>
+          </div>`;
       });
-      const yPct=totalP+totalA>0?Math.round(totalP/(totalP+totalA)*100):'—';
-      const yc=typeof yPct==='number'?(yPct>=75?'var(--green)':yPct>=50?'var(--gold)':'var(--red)'):'var(--text-muted)';
-      html += `<td style="text-align:center;font-weight:800;color:var(--green);padding:4px;">${totalP}</td><td style="text-align:center;font-weight:800;color:var(--red);padding:4px;">${totalA}</td><td style="text-align:center;font-weight:800;color:${yc};padding:4px;">${typeof yPct==='number'?yPct+'%':yPct}</td></tr>`;
-    });
-    html += '</tbody></table></div></div>';
+    }
+
+    const divPct = yearTotalP+yearTotalA>0 ? Math.round(yearTotalP/(yearTotalP+yearTotalA)*100) : 0;
+    const pctColor = divPct>=75?'#5CB87A':divPct>=50?'var(--gold)':'var(--red)';
+
+    html += `
+      <div style="margin-bottom:24px;">
+        <div class="report-division-header">
+          <span>Class ${dv} · ${students.length} students</span>
+          <span class="class-avg" style="background:${pctColor}">${divPct}% yearly</span>
+        </div>
+        ${studentRows}
+        <div class="week-summary-footer">
+          <span>Year Total</span>
+          <span>${yearTotalP}P · ${yearTotalA}A</span>
+          <span style="color:${pctColor}">${divPct}%</span>
+        </div>
+      </div>`;
   });
-  document.getElementById('attReportContent').innerHTML = html;
+
+  document.getElementById('attReportContent').innerHTML =
+    html || '<div class="empty-msg"><p>No yearly data available.</p></div>';
 }
+
 
 // ══════════════════════════════════════════════════════
 //  FEE COLLECTION REPORT
