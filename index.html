@@ -1319,9 +1319,11 @@ async function addStudent() {
   if (!/^\d{10}$/.test(whatsapp)) { showToast('WhatsApp number must be exactly 10 digits','error'); return; }
   const res = await api('addStudent', { division:state.division, name, guardian, whatsapp, addedBy:state.user.name });
   if (res.success) {
-    state.students.push({ id:res.studentId, name, guardian:guardian||'—', whatsapp });
+    // demoApi already saved — read back from demoStudents to get correct data
+    const fresh = (demoStudents[state.division]||[]).find(s=>s.id===res.studentId);
+    if (fresh) state.students.push(fresh);
     state.payments[res.studentId] = {};
-    updateCount(state.division, 1); // update count cache
+    updateCount(state.division, 1);
     closeModal('addStudentModal');
     renderStudents();
     renderDivisions();
@@ -2106,8 +2108,7 @@ async function mgmtAddStudent() {
   if (!/^\d{10}$/.test(whatsapp)) { showToast('WhatsApp must be 10 digits','error'); return; }
   const res = await api('addStudent', { division:div, name, guardian, whatsapp, addedBy:state.user.name });
   if (res.success) {
-    if (!demoStudents[div]) demoStudents[div] = [];
-    demoStudents[div].push({ id:res.studentId, name, guardian:guardian||'—', whatsapp });
+    // demoApi already saved to demoStudents — just update count and reload
     updateCount(div, 1);
     document.getElementById('mgmtNewName').value = '';
     document.getElementById('mgmtNewGuardian').value = '';
